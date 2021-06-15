@@ -43549,7 +43549,7 @@ X.prototype.gluTessProperty=X.prototype.B;X.prototype.gluGetTessProperty=X.proto
 	 * @param  {Number}
 	 * @return {Object[]}
 	 */
-	function parseOpenTypeTableEntries(data, numTables) {
+	function parseOpenTyplrableEntries(data, numTables) {
 	    var tableEntries = [];
 	    var p = 12;
 	    for (var i = 0; i < numTables; i += 1) {
@@ -43647,11 +43647,11 @@ X.prototype.gluTessProperty=X.prototype.B;X.prototype.gluGetTessProperty=X.proto
 	    if (signature === String.fromCharCode(0, 1, 0, 0) || signature === 'true' || signature === 'typ1') {
 	        font.outlinesFormat = 'truetype';
 	        numTables = parse.getUShort(data, 4);
-	        tableEntries = parseOpenTypeTableEntries(data, numTables);
+	        tableEntries = parseOpenTyplrableEntries(data, numTables);
 	    } else if (signature === 'OTTO') {
 	        font.outlinesFormat = 'cff';
 	        numTables = parse.getUShort(data, 4);
-	        tableEntries = parseOpenTypeTableEntries(data, numTables);
+	        tableEntries = parseOpenTyplrableEntries(data, numTables);
 	    } else if (signature === 'wOFF') {
 	        var flavor = parse.getTag(data, 4);
 	        if (flavor === String.fromCharCode(0, 1, 0, 0)) {
