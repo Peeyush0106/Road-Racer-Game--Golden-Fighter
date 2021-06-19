@@ -342,7 +342,7 @@ function gamingControlsUpDown() {
 }
 
 async function updatePassword(name) {
-    await database.ref(("Players/" + name)).update({
+    await database.ref(("Accounts/" + name)).update({
         password: inputPassword.value(),
     });
 }
@@ -354,12 +354,13 @@ async function validatePasswordAndEraseData(name) {
     if (removeDataPropmtValue === "I want to delete my data") {
         var removeDataPropmtEnteredPassword = prompt("Enter you password to confirm. If you change your mind, just click 'Ok'");
 
-        await database.ref("Players/" + name + "/password").get().then(function (data) {
+        await database.ref("Accounts/" + name + "/password").get().then(function (data) {
             if (data.exists() && !cancelAllCommands) {
                 var masterPwd = data.val();
                 if (removeDataPropmtEnteredPassword === masterPwd) {
                     cancelAllCommands = true;
-                    var ref = "Players/" + plrName;
+                    console.log("yes");
+                    var ref = "Accounts/" + plrName;
                     database.ref(ref).remove();
                     location.reload();
                 }
@@ -374,7 +375,7 @@ async function validatePasswordAndEraseData(name) {
 }
 
 async function checkPasswordCorrect(name, password) {
-    await database.ref("Players/" + name + "/password").get().then(function (data) {
+    await database.ref("Accounts/" + name + "/password").get().then(function (data) {
         if (data.exists() && !cancelAllCommands) {
             var masterPwd = data.val();
             if (masterPwd === password) {
@@ -397,10 +398,12 @@ function checkPasswordAndNameErr() {
     var name = inputName.value();
     if (pwd === "" && !cancelAllCommands) {
         cancelAllCommands = true;
+        console.log("yes");
         alert("Please enter a valid password");
     }
     if (name === "" && !cancelAllCommands) {
         cancelAllCommands = true;
+        console.log("yes");
         alert("Please enter a valid name");
     }
     else {
@@ -410,7 +413,7 @@ function checkPasswordAndNameErr() {
 
 // name existence
 async function checkNameExistence(playerName) {
-    await database.ref("Players/" + playerName).get().then(function (data) {
+    await database.ref("Accounts/" + playerName).get().then(function (data) {
         if (data.exists() && !cancelAllCommands) {
             //location.reload();
             plrNameAlreadyTaken = true;
@@ -444,13 +447,14 @@ function startGame() {
     info_text2.hide();
     createAccount.hide();
     login.hide();
-    secondTimeDiff = World.seconds - sec;
+    loginAndPlay.hide();
+    waitingTxt.show();
     gameReadyToPlay = true;
 }
 
 function putMeInWaitingRoom() {
-    playerCount += 1;
     gameState = "waiting";
+    playerCount += 1;
     updatePlayerCount();
 }
 
@@ -464,6 +468,50 @@ async function getPlayerCount() {
     await database.ref("/playerCount").get().then(function (data) {
         if (data.exists()) {
             playerCount = data.val();
+        }
+        else {
+
+        }
+    }).catch(function (error) {
+        console.error(error);
+    });
+}
+
+window.onbeforeunload = function () {
+    if (gameState !== "gettingStarted"
+        && gameState !== "over"
+        && gameState !== "win") {
+        playerCount -= 1;
+        updatePlayerCount();
+        plrCntDecreased = true;
+    }
+}
+
+function updateMyGamingStatus() {
+    if (plrIndex === 1) {
+        database.ref("Playing/players/").update({
+            1: {
+                name: plrName,
+                distance: distanceTravelled,
+                y: map1.y
+            }
+        });
+    }
+    if (plrIndex === 2) {
+        database.ref("Playing/players/").update({
+            2: {
+                name: plrName,
+                distance: distanceTravelled,
+                y: map1.y
+            }
+        });
+    }
+}
+
+async function getAllPlayersGamingStatus() {
+    await database.ref("/Playing/players").get().then(function (data) {
+        if (data.exists()) {
+            playerData = data.val();
         }
         else {
 

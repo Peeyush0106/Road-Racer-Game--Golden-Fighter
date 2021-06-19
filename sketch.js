@@ -1,15 +1,27 @@
 // Our main draw functin to control each and every part
 function draw() {
     image(goIMG, 200, 200)
-    if (gameLoaded) {
+    collidedBlueCars.setLifetimeEach(40);
+    collidedRedCars.setLifetimeEach(40);
+    if (gameLoaded && gameStarted) {
         background("black");
         sec = World.seconds - secondTimeDiff;
         playersEntered = playerCount;
 
         // Set some continuous properties
-        carShowPath.setVelocity(0, -1 * (road.velocityY / 55));
+        map1.setVelocity(0, -1 * (road.velocityY / 53));
+        if (playerData !== undefined) {
+            for (let j = 1; j <= playerCount; j++) {
+                if (plrName === playerData[j].name) {
+                    continue;
+                }
+                console.log(playerData[j].distance);
+                playerCarOther.y = playerData[j].y;
+            }
+        }
         fuelShow = Math.round((fuelLeft / 10000));
         timeElapsed = sec;
+        updateMyGamingStatus();
 
         //  Control game with conditional programming
 
@@ -28,14 +40,12 @@ function draw() {
         if (gameState != "win" && gameState != "over") {
             push();
             strokeWeight(4);
+
             stroke("lightgreen");
             fill("lightgreen");
-            line(carShowFlag.x, carShowFlag.y, carShowPath.x, carShowPath.y);
-            triangle(carShowFlag.x, carShowFlag.y, carShowFlag.x - 6, carShowFlag.y + 9, carShowFlag.x + 6, carShowFlag.y + 9);
-            strokeWeight(8);
-            stroke("red");
-            point(carShowPath.x, carShowPath.y);
-            pop();
+            line(carShowFlag1.x, carShowFlag1.y, map1.x, map1.y);
+            triangle(carShowFlag1.x, carShowFlag1.y, carShowFlag1.x - 6, carShowFlag1.y + 9, carShowFlag1.x + 6, carShowFlag1.y + 9);
+            point(map1.x, map1.y);
 
             fill("blue");
             rect(70, 5, 260, 60);
@@ -87,6 +97,11 @@ function draw() {
             fill("blue");
             text("Game Over! Refresh to Play Again..", 7.5, 170);
             graduallyDecreaseSpeed();
+            if (!plrCntDecreased) {
+                playerCount -= 1;
+                updatePlayerCount();
+                plrCntDecreased = true;
+            }
         }
 
         // When the game is won
@@ -99,6 +114,11 @@ function draw() {
             fill("red");
             text("Yeah! You Won the Game!", 55, 170);
             text("Refresh to play again!", 55, 200);
+            if (!plrCntDecreased) {
+                playerCount -= 1;
+                updatePlayerCount();
+                plrCntDecreased = true;
+            }
         }
 
         // If 60 frames have past after the playerCar touched any obstacle
@@ -116,7 +136,7 @@ function draw() {
         }
 
         // If the game didn't yet start, the timer's on
-        if (gameState === "gettingStarted") {
+        if (gameState === "startedAndMoving") {
             startTimerShow.visible = true;
             if (sec) {
                 if (sec === 1) {
@@ -196,6 +216,7 @@ function draw() {
                 road.setVelocity(0, 0);
             }
             playerCar.setVelocity(0, -3);
+            playerCar.rotationSpeed = 0;
         }
 
         // When the car is currently running
@@ -237,7 +258,7 @@ function draw() {
             alert("Name already taken, choose another one");
             location.reload();
         } else {
-            // Create new account and login
+            // Create new account and start playing
             startGame();
             updatePassword(plrName);
         }
@@ -248,29 +269,33 @@ function draw() {
         startGame();
         passwordStatus = 0;
     }
-    else if (passwordStatus === -1) {
+    else if (passwordStatus === -1 && !cancelAllCommands) {
+        cancelAllCommands = true;
+        console.log("yes");
         alert("Incorrect password, please try again!!");
         passwordStatus = 0;
         location.reload();
     }
-    else if (passwordStatus === -2) {
+    else if (passwordStatus === -2 && !cancelAllCommands) {
+        cancelAllCommands = true;
+        console.log("yes");
         alert("Account does not exist, try creating a new one!!");
         passwordStatus = 0;
         location.reload();
     }
-    if (gameState === "waiting" || gameState === "gettingStarted") {
-        getPlayerCount();
+    getPlayerCount();
+    getAllPlayersGamingStatus();
+    if (playerCount > 1 && !gameStarted && gameLoaded) {
+        gameState = "startedAndMoving";
+        gameStarted = true;
+        console.log(sec);
+        secondTimeDiff = World.seconds - sec;
+        waitingTxt.hide();
+        for (var i = 0; i < playerCount - 1; i++) {
+            playerCarOther = createSprite(25, 360);
+            playerCarOther.addImage("image", img9);
+            playerCarOther.scale = 0.04;
+            playerCarOther.tint = rgb(random(100, 200), random(100, 200), random(100, 200));
+        }
     }
 }
-
-// window.addEventListener('beforeunload', function (e) {
-//     e.preventDefault();
-//     e.returnValue = 'Do you really want to leave the page';
-// });
-
-window.onunload = function () {
-    prompt("Do you really want to close?");
-    return false;
-};
-
-var func = window.onunload();

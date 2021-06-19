@@ -1,13 +1,13 @@
 // Initial Variable Declaration
-var road, fuelLeft, fuelShow, carShowPath, carShowFlag,
+var road, fuelLeft, fuelShow,
     stars, timeElapsed, startTimerShow, rightEdgeX, leftEdgeX, laneX,
     edgesLev1, rightEdgeLev1, leftEdgeLev1, startCounter, touchingCounter,
     gameState, distanceTravelled, finishLine, playerCar, blueCars, redCars, cancelAllCommands,
-    fuelCars, collidedBlueCars, collidedRedCars, sec, nameInp,
-    maxBlueCars, maxRedCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay,
-    blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playersEntered, playerCount,
-    passwordStatus, login,
-    blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4,
+    fuelCars, collidedBlueCars, collidedRedCars, sec, nameInp, carShowFlag1, carShowFlag2,
+    maxBlueCars, maxRedCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
+    blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playersEntered, playerCount, playCliked, playerData,
+    passwordStatus, login, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, playerCarOther,
+    blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex,
     img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG,
     finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads;
 
@@ -50,29 +50,34 @@ function setup() {
     road.width = 400;
     road.height = 600;
 
-    pathMap = showMap(15, 360, img9, 0.08, null,
-        15, 20, finalFlagPathShowIMG, 0.08, 45);
+    carShowFlags = [];
+    map1 = makeMap(10, 360, img9, 0.08, null,
+        10, 20, finalFlagPathShowIMG, 0.08, 45);
+    carShowFlag1 = carShowFlags[0];
+    carShowFlag2 = carShowFlags[1];
 
     fuelLeft = 500000;
     fuelShow = 0;
-    carShowPath, carShowFlag;
 
     stars = 12;
-
+    gameStarted = false;
     timeElapsed = sec;
+    plrCntDecreased = false;
 
-    function showMap(x1, y1, anim1, scale1, rotate1, x2, y2, anim2, scale2, rotate2) {
+    function makeMap(x1, y1, anim1, scale1, rotate1, x2, y2, anim2, scale2, rotate2) {
         carShowFlag = createSprite(x2, y2);
         carShowFlag.addImage("image", anim2);
         carShowFlag.scale = scale2;
         carShowFlag.rotation = rotate2;
 
-        carShowPath = createSprite(x1, y1);
+        carShowFlags.push(carShowFlag);
+
+        var carShowPath = createSprite(x1, y1);
         carShowPath.addImage("image", anim1);
         carShowPath.scale = scale1;
         carShowPath.rotation = rotate1;
 
-        return (carShowPath + carShowFlag);
+        return carShowPath;
     }
 
     startTimerShow = createSprite(225, 200);
@@ -132,26 +137,44 @@ function setup() {
 
     info_text = createElement('h5').position(10, 70).html("If you want to create a new account, click on 'Create a new account'");
 
-    info_text2 = createElement('h6').position(10, 85).html("If you want to resume an account, just enter the earlier details and press 'Login'. :)");
+    info_text2 = createElement('h6').position(10, 85).html("If you want to resume an account, just enter the earlier details and press 'Login' or Login and Start Playing. :)").style("font-size", "10px");
+
+    waitingTxt = createElement('h5').position(10, 70).html("Waiting for player(s)...").hide();
 
     createAccount = createButton("Create a new account").position(250, 30).style("background-color", "red").style("color", "white").mousePressed(function () {
-        plrNameAlreadyTaken = false;
-        nameChecked = false;
-        plrName = inputName.value();
-        checkPasswordAndNameErr();
         if (!cancelAllCommands) {
+            plrNameAlreadyTaken = false;
+            nameChecked = false;
+            plrName = inputName.value();
+            checkPasswordAndNameErr();
             checkNameExistence(plrName);
+            putMeInWaitingRoom();
         }
-        putMeInWaitingRoom();
     });
-    login = createButton("Login").position(250, 55).style("background-color", "blue").style("color", "white").mousePressed(function () {
-        plrName = inputName.value();
-        var pwd = inputPassword.value();
-        checkPasswordAndNameErr();
+    loginAndPlay = createButton("Login and Start Playing").position(250, 55).style("background-color", "blue").style("color", "white").mousePressed(function () {
         if (!cancelAllCommands) {
+            plrName = inputName.value();
+            var pwd = inputPassword.value();
+            checkPasswordAndNameErr();
             checkPasswordCorrect(plrName, pwd);
+            putMeInWaitingRoom();
+            playCliked = true;
+            plrIndex = playerCount;
+            alert(plrIndex);
         }
-        putMeInWaitingRoom();
+    });
+    // play = createButton("Play").position(455, 12).style("background-color", "blue").style("color", "white").mousePressed(function () {
+    //     putMeInWaitingRoom();
+    //     playCliked = true;
+    // });
+    login = createButton("Login").position(410, 55).style("background-color", "blue").style("color", "white").mousePressed(function () {
+        if (!cancelAllCommands) {
+            plrName = inputName.value();
+            var pwd = inputPassword.value();
+            checkPasswordAndNameErr();
+            checkPasswordCorrect(plrName, pwd);
+            putMeInWaitingRoom();
+        }
     });
 
     createWorldVehicles();
