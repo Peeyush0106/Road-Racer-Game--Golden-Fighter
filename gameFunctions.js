@@ -393,7 +393,7 @@ async function checkPasswordCorrect(name, password) {
     });
 }
 
-function checkPasswordAndNameErr() {
+async function checkPasswordAndNameErr() {
     var pwd = inputPassword.value();
     var name = inputName.value();
     if (pwd === "" && !cancelAllCommands) {
@@ -455,12 +455,12 @@ function startGame() {
 function putMeInWaitingRoom() {
     gameState = "waiting";
     playerCount += 1;
-    updatePlayerCount();
+    updatePlayerCount(playerCount);
 }
 
-function updatePlayerCount() {
-    database.ref("/").update({
-        playerCount: playerCount
+async function updatePlayerCount(count) {
+    await database.ref("/").update({
+        playerCount: count
     });
 }
 
@@ -482,14 +482,20 @@ window.onbeforeunload = function () {
         && gameState !== "over"
         && gameState !== "win") {
         playerCount -= 1;
-        updatePlayerCount();
+        updatePlayerCount(playerCount);
         plrCntDecreased = true;
+        removeMeFromGame();
     }
 }
 
-function updateMyGamingStatus() {
+async function removeMeFromGame() {
+    await database.ref("Playing/players/" + playerCount).remove;
+}
+
+async function updateMyGamingStatus() {
+    console.log(plrIndex);
     if (plrIndex === 1) {
-        database.ref("Playing/players/").update({
+        await database.ref("Playing/players/").update({
             1: {
                 name: plrName,
                 distance: distanceTravelled,
@@ -498,8 +504,34 @@ function updateMyGamingStatus() {
         });
     }
     if (plrIndex === 2) {
-        database.ref("Playing/players/").update({
+        await database.ref("Playing/players/").update({
             2: {
+                name: plrName,
+                distance: distanceTravelled,
+                y: map1.y
+            }
+        });
+    } if (plrIndex === 3) {
+        await database.ref("Playing/players/").update({
+            3: {
+                name: plrName,
+                distance: distanceTravelled,
+                y: map1.y
+            }
+        });
+    }
+    if (plrIndex === 4) {
+        await database.ref("Playing/players/").update({
+            4: {
+                name: plrName,
+                distance: distanceTravelled,
+                y: map1.y
+            }
+        });
+    }
+    if (plrIndex === 5) {
+        await database.ref("Playing/players/").update({
+            5: {
                 name: plrName,
                 distance: distanceTravelled,
                 y: map1.y

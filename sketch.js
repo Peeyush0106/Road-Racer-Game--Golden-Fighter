@@ -12,11 +12,12 @@ function draw() {
         map1.setVelocity(0, -1 * (road.velocityY / 53));
         if (playerData !== undefined) {
             for (let j = 1; j <= playerCount; j++) {
+                console.log(playerData, "----", playerData[j], "----", playerData[j].name);
                 if (plrName === playerData[j].name) {
                     continue;
                 }
-                console.log(playerData[j].distance);
-                playerCarOther.y = playerData[j].y;
+                console.log(j, "-----", otherPlayerCars[j - 1].y, "-----", playerData[j].y);
+                otherPlayerCars[j - 1].y = playerData[j].y;
             }
         }
         fuelShow = Math.round((fuelLeft / 10000));
@@ -99,7 +100,7 @@ function draw() {
             graduallyDecreaseSpeed();
             if (!plrCntDecreased) {
                 playerCount -= 1;
-                updatePlayerCount();
+                updatePlayerCount(playerCount);
                 plrCntDecreased = true;
             }
         }
@@ -116,7 +117,7 @@ function draw() {
             text("Refresh to play again!", 55, 200);
             if (!plrCntDecreased) {
                 playerCount -= 1;
-                updatePlayerCount();
+                updatePlayerCount(playerCount);
                 plrCntDecreased = true;
             }
         }
@@ -288,14 +289,14 @@ function draw() {
     if (playerCount > 1 && !gameStarted && gameLoaded) {
         gameState = "startedAndMoving";
         gameStarted = true;
-        console.log(sec);
         secondTimeDiff = World.seconds - sec;
         waitingTxt.hide();
         for (var i = 0; i < playerCount - 1; i++) {
-            playerCarOther = createSprite(25, 360);
+            var playerCarOther = createSprite(25, 360);
             playerCarOther.addImage("image", img9);
             playerCarOther.scale = 0.04;
             playerCarOther.tint = rgb(random(100, 200), random(100, 200), random(100, 200));
+            otherPlayerCars.push(playerCarOther);
         }
     }
 }

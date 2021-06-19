@@ -6,7 +6,7 @@ var road, fuelLeft, fuelShow,
     fuelCars, collidedBlueCars, collidedRedCars, sec, nameInp, carShowFlag1, carShowFlag2,
     maxBlueCars, maxRedCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
     blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playersEntered, playerCount, playCliked, playerData,
-    passwordStatus, login, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, playerCarOther,
+    passwordStatus, login, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, otherPlayerCars,
     blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex,
     img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG,
     finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads;
@@ -63,6 +63,7 @@ function setup() {
     gameStarted = false;
     timeElapsed = sec;
     plrCntDecreased = false;
+    otherPlayerCars = [];
 
     function makeMap(x1, y1, anim1, scale1, rotate1, x2, y2, anim2, scale2, rotate2) {
         carShowFlag = createSprite(x2, y2);
