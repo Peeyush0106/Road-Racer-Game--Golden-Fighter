@@ -1,5 +1,4 @@
 // External Function declaration
-
 // Create player car
 function createPlayerCar() {
     playerCar = createSprite(laneX[1], 340);
