@@ -1,11 +1,9 @@
 // Our main draw functin to control each and every part
 function draw() {
+    getOtherPlrName();
     image(goIMG, 200, 200)
     collidedBlueCars.setLifetimeEach(2.2);
     collidedRedCars.setLifetimeEach(2.2);
-    if(!gameStarted){
-        image();
-    }
     if (gameLoaded && gameStarted) {
         background("black");
         if (!cancelGameMovement) {
@@ -129,14 +127,8 @@ function draw() {
 
             // When the game is won
             if (gameState === "win") {
-                fill("green");
-                rect(50, 147.5, 300, 60);
-                textSize(25);
-                strokeWeight(2);
-                stroke("yellow");
-                fill("red");
-                text("Yeah! You Won the Game!", 55, 170);
-                text("Refresh to play again!", 55, 200);
+                showWinMessage();
+                loseOtherPlayer();
                 if (!plrCntDecreased) {
                     playerCount -= 1;
                     updatePlayerCount(playerCount);
@@ -328,4 +320,13 @@ function draw() {
     if (gameState === "waiting") {
         showLoadingAnim();
     }
+    if (!gameStarted) {
+        if (gameState === "waiting") {
+            image(logo, 40, 145);
+        }
+        else {
+            image(gameImg, 40, 145, 624 / 1.5, 288 / 1.5);
+        }
+    }
+    checkIfOtherPlayerWonAndThenLoseMe();
 }

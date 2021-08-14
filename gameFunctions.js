@@ -540,7 +540,6 @@ function showWinMessage() {
         {
             fill("lightgreen");
             // To-do: remove below line on finalization
-            plrName = "OOOOOOOO";
             croppedPlrname = plrName.slice(0, 3);
             if (plrName.length >= 3) {
                 crownX = 160;
@@ -557,7 +556,6 @@ function showWinMessage() {
         {
             fill("magenta");
             // To-do: remove below line on finalization
-            otherPlrName = "PPPPPPPPPPPP";
             croppedOtherPlrName = otherPlrName.slice(0, 3);
             if (otherPlrName.length >= 3) {
                 cloudX = 160;
@@ -633,7 +631,6 @@ function showLoseMessage() {
         {
             fill("lightgreen");
             // To-do: remove below line on finalization
-            plrName = "OOOOOOOO";
             croppedPlrname = plrName.slice(0, 3);
             if (plrName.length >= 3) {
                 crownX = 300;
@@ -650,7 +647,6 @@ function showLoseMessage() {
         {
             fill("magenta");
             // To-do: remove below line on finalization
-            otherPlrName = "PPPPPPPPPPPP";
             croppedOtherPlrName = otherPlrName.slice(0, 3);
             if (otherPlrName.length >= 3) {
                 cloudX = 160;
@@ -690,6 +686,7 @@ function showLoseMessage() {
     }
     pop();
     endTxt.show();
+    alert("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or you might have ran out of stars. You loose even when the time of 100 seconds is up. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
 }
 
 function stopAllSprites() {
@@ -697,4 +694,26 @@ function stopAllSprites() {
         allSprites[i].velocityX = 0;
         allSprites[i].velocityY = 0;
     }
+}
+
+function loseOtherPlayer() {
+    database.ref("Players/playing/" + otherPlrIndex).update({
+        otherPlrWon: true
+    });
+}
+
+function checkIfOtherPlayerWonAndThenLoseMe() {
+    database.ref("Players/playing/" + otherPlrIndex + "/otherPlrWon").get().then((data) => {
+        if (data.val()) {
+            showLoseMessage();
+        }
+    });
+}
+
+function getOtherPlrName() {
+    database.ref("Playing/players/" + otherPlrIndex).get().then((data) => {
+        if (data.exists()) {
+            otherPlrName = data.val().name;
+        }
+    });
 }

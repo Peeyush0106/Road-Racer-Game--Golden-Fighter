@@ -8,7 +8,7 @@ var road, fuelLeft, fuelShow,
     blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading,
     passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, giveUp,
     blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation,
-    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame;
+    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo;
 
 function preload() {
     gameLoaded = false;
@@ -34,10 +34,11 @@ function preload() {
     timer3IMG = loadImage("images/3-timer.png", gameIsLoaded());
     timer2IMG = loadImage("images/2-timer.png", gameIsLoaded());
     timer1IMG = loadImage("images/1-timer.png", gameIsLoaded());
-    goIMG = loadImage("images/go.png");
-    crown = loadImage("images/crown.webp");
-    cloud = loadImage("images/cloud.jpg");
-    logo = loadImage("images/Logo.png");
+    goIMG = loadImage("images/go.png", gameIsLoaded());
+    crown = loadImage("images/crown.webp", gameIsLoaded());
+    cloud = loadImage("images/cloud.jpg", gameIsLoaded());
+    gameImg = loadImage("images/Game-img.png", gameIsLoaded());
+    logo = loadImage("images/logo.png", gameIsLoaded());
 }
 
 function setup() {
@@ -46,7 +47,7 @@ function setup() {
     // IMPORTANT: The two arrows have not been indented because they were getting indented in the alert as well
     alert(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
 ---> If you want to create a new account, click on 'Create a new account'
----> If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :) Hopw you will enjoy this game. Thanks for your attention.`);
+---> If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :) Hope you will enjoy this game. Thanks for your attention.`);
     // Database setup
     database = firebase.database();
     // Initial Variable Declaration
@@ -161,8 +162,8 @@ function setup() {
     fuelCarVelocity = random(4.5, 6.5);
 
     // Y Offset for the starting of cars
-    blueCarSpacing = 100;
-    redCarSpacing = 100;
+    blueCarSpacing = 300;
+    redCarSpacing = 300;
     fuelCarSpacing = 750;
 
     nameChecked = false;
@@ -214,7 +215,6 @@ function setup() {
             if (plrIndex === 2) {
                 otherPlrIndex = 1;
             }
-            alert(plrIndex, otherPlrIndex);
         }
     });
     giveUp = createButton("Give Up").position(360, 350).style("background-color", "red").style("color", "white").mousePressed(function () {
@@ -234,7 +234,7 @@ function setup() {
     }).hide();
 
     createWorldVehicles();
-    if (imgLoads.length === 24 && gameReadyToPlay) {
+    if (imgLoads.length === 26 && gameReadyToPlay) {
         gameLoaded = true;
     }
     sec = 0;
