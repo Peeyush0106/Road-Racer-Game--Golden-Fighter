@@ -348,10 +348,10 @@ async function updatePassword(name) {
 
 // erasing data password validation
 async function validatePasswordAndEraseData(name) {
-    var removeDataPropmtValue = prompt("Be careful, you are about to erase your data. Type 'I want to delete my data' in case sensitive to delete this data. If you change your mind, just click 'Ok'");
+    var removeDataPropmtValue = prompt("Be careful, you are about to erase your data. Type 'I want to delete my data' in case sensitive to delete this data. If you change your mind, just cancel this dialogue box");
 
     if (removeDataPropmtValue === "I want to delete my data") {
-        var removeDataPropmtEnteredPassword = prompt("Enter you password to confirm. If you change your mind, just click 'Ok'");
+        var removeDataPropmtEnteredPassword = prompt("Enter you password to confirm. If you change your mind, just cancel this dialogue box");
 
         await database.ref("Accounts/" + name + "/password").get().then(function (data) {
             if (data.exists() && !cancelAllCommands) {
@@ -445,10 +445,10 @@ function startGame() {
     info_text.hide();
     info_text2.hide();
     createAccount.hide();
-    login.hide();
     loginAndPlay.hide();
+    giveUp.elt.innerText = "Cancel Play Request";
+    giveUp.show();
     waitingTxt.show();
-    gameReadyToPlay = true;
 }
 
 function putMeInWaitingRoom() {
@@ -480,61 +480,22 @@ window.onbeforeunload = function () {
     if (gameState !== "gettingStarted"
         && gameState !== "over"
         && gameState !== "win") {
+        if (playerCount === 1) {
+            database.ref("Playing").remove();
+        }
         playerCount -= 1;
         updatePlayerCount(playerCount);
         plrCntDecreased = true;
-        removeMeFromGame();
+        unloading = true;
     }
-}
-
-async function removeMeFromGame() {
-    await database.ref("Playing/players/" + playerCount).remove;
 }
 
 async function updateMyGamingStatus() {
-    console.log(plrIndex);
-    if (plrIndex === 1) {
-        await database.ref("Playing/players/").update({
-            1: {
-                name: plrName,
-                distance: distanceTravelled,
-                y: map1.y
-            }
-        });
-    }
-    if (plrIndex === 2) {
-        await database.ref("Playing/players/").update({
-            2: {
-                name: plrName,
-                distance: distanceTravelled,
-                y: map1.y
-            }
-        });
-    } if (plrIndex === 3) {
-        await database.ref("Playing/players/").update({
-            3: {
-                name: plrName,
-                distance: distanceTravelled,
-                y: map1.y
-            }
-        });
-    }
-    if (plrIndex === 4) {
-        await database.ref("Playing/players/").update({
-            4: {
-                name: plrName,
-                distance: distanceTravelled,
-                y: map1.y
-            }
-        });
-    }
-    if (plrIndex === 5) {
-        await database.ref("Playing/players/").update({
-            5: {
-                name: plrName,
-                distance: distanceTravelled,
-                y: map1.y
-            }
+    if (!unloading) {
+        await database.ref("Playing/players/" + plrIndex).update({
+            name: plrName,
+            distance: distanceTravelled,
+            y: map1.y
         });
     }
 }
@@ -550,4 +511,110 @@ async function getAllPlayersGamingStatus() {
     }).catch(function (error) {
         console.error(error);
     });
+}
+
+async function getOtherPlayerLoosing() {
+    await database.ref("/Playing/players/" + otherPlrIndex + "/lost").get().then(function (data) {
+        if (data.exists()) {
+            otherPlrLost = data.val();
+        }
+        else {
+            otherPlrLost = false;
+        }
+    }).catch(function (error) {
+        console.error(error);
+    });
+}
+
+function showWinMessage() {
+    var maxCrownY = 160;
+    var maxCloudX1 = 250;
+    var maxCloudX2 = 280;
+    push();
+    // Message box
+    {
+        push();
+        rectMode(CENTER);
+        fill("black");
+        rect(250, 200, 250, 130);
+        pop();
+    }
+    // Show the encouragement text
+    // Show player tags
+    {
+        textSize(15);
+        fill("darkblue");
+        push();
+        stroke("white");
+        strokeWeight(1.5);
+        text("You", 130, 260);
+        text("Opponent", 280, 260);
+        pop();
+    }
+    // Define the values of formatting and show text
+    {
+        calculateWinMsgPlrTextValues();
+        text(croppedPlrname, 125, 240);
+        calculateWinMsgOtherPlrTextValues();
+        text(croppedOtherPlrName, 290, 240);
+    }
+    // Movement of the crown
+    {
+        push();
+        translate(crownX, crownY);
+        if (crownY < maxCrownY) {
+            crownY += 6;
+            crownRotation += 0.39;
+        }
+        rotate(crownRotation);
+        image(crown, 0, 0, (1329 / 10 / 2.2), (980 / 10 / 2.2));
+        pop();
+    }
+    // Movement of the cloud
+    {
+        if (cloudX1 < maxCloudX1) {
+            cloudX1 += 6;
+        }
+        if (cloudX2 > maxCloudX2) {
+            cloudX2 -= 5;
+        }
+        image(cloud, cloudX1, cloudY, (5277 / 80), (3745 / 80));
+        image(cloud, cloudX2, cloudY, (5277 / 80), (3745 / 80));
+    }
+    pop();
+    winTxt.show();
+}
+
+function calculateWinMsgPlrTextValues() {
+    // To-do: remove below line on finalization
+    fill("lightgreen");
+    plrName = "OOOOOOOO";
+    croppedPlrname = plrName.slice(0, 3);
+    if (plrName.length >= 3) {
+        crownX = 160;
+    }
+    if (plrName.length > 3) {
+        croppedPlrname = plrName.slice(0, 3) + "..";
+        textSize(50);
+    }
+    else {
+        textSize(70)
+    }
+}
+
+function calculateWinMsgOtherPlrTextValues() {
+    // To-do: remove below line on finalization
+    fill("magenta");
+    otherPlrName = "PPPPPPPPPPPP";
+    croppedOtherPlrName = otherPlrName.slice(0, 3);
+    if (otherPlrName.length >= 3) {
+        cloudX = 160;
+    }
+    if (otherPlrName.length > 3) {
+        croppedOtherPlrName = otherPlrName.slice(0, 3) + "..";
+        textSize(22.5);
+    }
+    else {
+        textSize(42.5);
+    }
 }

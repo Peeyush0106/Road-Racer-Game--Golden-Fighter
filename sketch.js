@@ -5,24 +5,36 @@ function draw() {
     collidedRedCars.setLifetimeEach(40);
     if (gameLoaded && gameStarted) {
         background("black");
+        updateMyGamingStatus();
         sec = World.seconds - secondTimeDiff;
         playersEntered = playerCount;
-
+        if (!playInfoSet) {
+            document.getElementById("play-info").hidden = false;
+            select("#play-info").position(405, 30);
+            playInfoSet = true;
+        }
+        if (!giveUpSet) {
+            giveUp.position(400, 350);
+            giveUpSet = true;
+            giveUp.hide();
+        }
+        if (!cancelCheckingOtherPlayerLoosing) {
+            getOtherPlayerLoosing();
+        }
         // Set some continuous properties
         map1.setVelocity(0, -1 * (road.velocityY / 53));
         if (playerData !== undefined) {
             for (let j = 1; j <= playerCount; j++) {
-                console.log(playerData, "----", playerData[j], "----", playerData[j].name);
-                if (plrName === playerData[j].name) {
+                console.log(j);
+                if (playerData[j] !== undefined && playerData[j].name !== undefined && plrName === playerData[j].name) {
                     continue;
                 }
-                console.log(j, "-----", otherPlayerCars[j - 1].y, "-----", playerData[j].y);
-                otherPlayerCars[j - 1].y = playerData[j].y;
+                if (playerData[j] !== undefined) {
+                    playerCarOther.y = playerData[j].y;
+                }
             }
         }
         fuelShow = Math.round((fuelLeft / 10000));
-        timeElapsed = sec;
-        updateMyGamingStatus();
 
         //  Control game with conditional programming
 
@@ -36,6 +48,21 @@ function draw() {
 
         // Draw our sprites
         drawSprites();
+
+        if (otherPlrLost) {
+            push();
+            stroke("red");
+            strokeWeight(3);
+            line(playerCarOther.x - 5, playerCarOther.y - 5, playerCarOther.x + 5, playerCarOther.y + 5);
+            line(playerCarOther.x + 5, playerCarOther.y - 5, playerCarOther.x - 5, playerCarOther.y + 5);
+            pop();
+            giveUp.hide();
+            showedWinMessage = true;
+            cancelCheckingOtherPlayerLoosing = true;
+            otherPlrLost = true;
+            database.ref("Playing/players/" + otherPlrIndex).remove();
+            showWinMessage();
+        }
 
         // When the game is running, not won or lost
         if (gameState != "win" && gameState != "over") {
@@ -58,7 +85,7 @@ function draw() {
             text("Stars: " + stars, 75, 40);
             text("Speed: " + Math.round(road.velocityY * 10) + " Km/Hr", 75, 60);
             text("Distance Travelled: " + distanceTravelled + "0 M", 185, 20);
-            text("Time Elapsed: " + timeElapsed + " Sec", 185, 40);
+            text("Time Elapsed: " + sec + " Sec", 185, 40);
             text("To travel more: " + (200 - distanceTravelled + "0 M"), 185, 60);
 
             push();
@@ -70,14 +97,6 @@ function draw() {
             pop();
 
             recreateOvertakenCars();
-        }
-
-        // When to show the instructions
-        if (timeElapsed < 10) {
-            text("Try to reach the goal before 75 seconds, you have to travel 2 KM distance, "
-                + "a star is the most helpful to buy fuel."
-                + " Hit the fuel car to buy fuel!",
-                135, 240, 205);
         }
 
         // When the playerCar wants to pick up fuel
@@ -98,6 +117,9 @@ function draw() {
             fill("blue");
             text("Game Over! Refresh to Play Again..", 7.5, 170);
             graduallyDecreaseSpeed();
+            database.ref("Playing/players/" + plrIndex).update({
+                lost: true
+            });
             if (!plrCntDecreased) {
                 playerCount -= 1;
                 updatePlayerCount(playerCount);
@@ -142,19 +164,19 @@ function draw() {
             if (sec) {
                 if (sec === 1) {
                     startTimerShow.addImage("image", timer3IMG);
-                    startTimerShow.visible = true
+                    startTimerShow.visible = true;
                 }
                 if (sec === 2) {
                     startTimerShow.addImage("image", timer2IMG);
-                    startTimerShow.visible = true
+                    startTimerShow.visible = true;
                 }
                 if (sec === 3) {
                     startTimerShow.addImage("image", timer1IMG);
-                    startTimerShow.visible = true
+                    startTimerShow.visible = true;
                 }
                 if (sec === 4) {
                     startTimerShow.addImage("image", goIMG);
-                    startTimerShow.visible = true
+                    startTimerShow.visible = true;
                 }
                 startCounter = startCounter + 0.5;
             }
@@ -162,7 +184,11 @@ function draw() {
                 startTimerShow.visible = false;
             }
         }
-        if (sec > 4) startTimerShow.visible = false;
+        if (sec > 4) {
+            startTimerShow.visible = false;
+            giveUp.elt.innerText = "Give Up";
+            giveUp.show();
+        }
 
         // Control of cars when the game has just started
         if (gameState != "car-hit"
@@ -178,7 +204,7 @@ function draw() {
             }
 
             // What all conditions make the game over
-            if (fuelShow <= 0 || timeElapsed > 75 || stars <= 0) {
+            if (fuelShow <= 0 || sec > 100 || stars <= 0) {
                 gameState = "over";
             }
         }
@@ -206,7 +232,7 @@ function draw() {
         }
 
         // WHat al coditions make the game win
-        if (distanceTravelled > 199 && timeElapsed < 75 && stars > 0) {
+        if (distanceTravelled > 199 && sec < 100 && stars > 0) {
             finishLine.visible = true;
             playerCar.depth = 100;
             finishLine.addImage("image", finLineIMG);
@@ -292,11 +318,10 @@ function draw() {
         secondTimeDiff = World.seconds - sec;
         waitingTxt.hide();
         for (var i = 0; i < playerCount - 1; i++) {
-            var playerCarOther = createSprite(25, 360);
+            playerCarOther = createSprite(25, 360);
             playerCarOther.addImage("image", img9);
             playerCarOther.scale = 0.04;
             playerCarOther.tint = rgb(random(100, 200), random(100, 200), random(100, 200));
-            otherPlayerCars.push(playerCarOther);
         }
     }
 }
