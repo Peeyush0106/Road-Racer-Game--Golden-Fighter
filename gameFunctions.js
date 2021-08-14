@@ -118,7 +118,9 @@ function controlWorldCarsVelocity() {
     redCars.setVelocityYEach(road.velocityY - redCarVelocity);
     fuelCars.setVelocityYEach(road.velocityY - fuelCarVelocity);
     collidedBlueCars.setVelocityYEach(road.velocityY);
+    collidedBlueCars.setLifetimeEach(2);
     collidedRedCars.setVelocityYEach(road.velocityY);
+    collidedRedCars.setLifetimeEach(2);
 }
 
 // When our car has been overtaken, reuse them ahead
@@ -131,7 +133,7 @@ function recreateOvertakenCars() {
         }
     }
 
-    // FOr red
+    // For red
     for (var j = 0; j < redCars.length; j++) {
         var redCar = redCars.get(j);
         if (redCar.y > 600) {
@@ -168,10 +170,10 @@ function recreateOvertakenCars() {
     }
 }
 
+// When the game images and data is loaded
 function gameIsLoaded() {
     imgLoads.push(imgLoads.length + 1);
 }
-
 
 // Function for Fuel reloads
 
@@ -346,33 +348,6 @@ async function updatePassword(name) {
     });
 }
 
-// erasing data password validation
-async function validatePasswordAndEraseData(name) {
-    var removeDataPropmtValue = prompt("Be careful, you are about to erase your data. Type 'I want to delete my data' in case sensitive to delete this data. If you change your mind, just cancel this dialogue box");
-
-    if (removeDataPropmtValue === "I want to delete my data") {
-        var removeDataPropmtEnteredPassword = prompt("Enter you password to confirm. If you change your mind, just cancel this dialogue box");
-
-        await database.ref("Accounts/" + name + "/password").get().then(function (data) {
-            if (data.exists() && !cancelAllCommands) {
-                var masterPwd = data.val();
-                if (removeDataPropmtEnteredPassword === masterPwd) {
-                    cancelAllCommands = true;
-                    console.log("yes");
-                    var ref = "Accounts/" + plrName;
-                    database.ref(ref).remove();
-                    location.reload();
-                }
-                else {
-                    alert("Incorrect Password. please try again.");
-                }
-            }
-        }).catch(function (error) {
-            console.error(error);
-        });
-    }
-}
-
 async function checkPasswordCorrect(name, password) {
     await database.ref("Accounts/" + name + "/password").get().then(function (data) {
         if (data.exists() && !cancelAllCommands) {
@@ -464,16 +439,18 @@ async function updatePlayerCount(count) {
 }
 
 async function getPlayerCount() {
-    await database.ref("/playerCount").get().then(function (data) {
-        if (data.exists()) {
-            playerCount = data.val();
-        }
-        else {
+    if (!leavingGame) {
+        await database.ref("/playerCount").get().then(function (data) {
+            if (data.exists()) {
+                playerCount = data.val();
+            }
+            else {
 
-        }
-    }).catch(function (error) {
-        console.error(error);
-    });
+            }
+        }).catch(function (error) {
+            console.error(error);
+        });
+    }
 }
 
 window.onbeforeunload = function () {
@@ -483,10 +460,14 @@ window.onbeforeunload = function () {
         if (playerCount === 1) {
             database.ref("Playing").remove();
         }
-        playerCount -= 1;
+        playerCount = 0;
         updatePlayerCount(playerCount);
         plrCntDecreased = true;
         unloading = true;
+    }
+
+    if (gameStarted || gameState === "waiting") {
+        leavingGame = true;
     }
 }
 
@@ -527,6 +508,9 @@ async function getOtherPlayerLoosing() {
 }
 
 function showWinMessage() {
+    stopAllSprites();
+    endGameBtn.show();
+    cancelGameMovement = true;
     var maxCrownY = 160;
     var maxCloudX1 = 250;
     var maxCloudX2 = 280;
@@ -553,10 +537,40 @@ function showWinMessage() {
     }
     // Define the values of formatting and show text
     {
-        calculateWinMsgPlrTextValues();
-        text(croppedPlrname, 125, 240);
-        calculateWinMsgOtherPlrTextValues();
-        text(croppedOtherPlrName, 290, 240);
+        {
+            fill("lightgreen");
+            // To-do: remove below line on finalization
+            plrName = "OOOOOOOO";
+            croppedPlrname = plrName.slice(0, 3);
+            if (plrName.length >= 3) {
+                crownX = 160;
+            }
+            if (plrName.length > 3) {
+                croppedPlrname = plrName.slice(0, 3) + "..";
+                textSize(50);
+            }
+            else {
+                textSize(70)
+            }
+            text(croppedPlrname, 125, 240);
+        }
+        {
+            fill("magenta");
+            // To-do: remove below line on finalization
+            otherPlrName = "PPPPPPPPPPPP";
+            croppedOtherPlrName = otherPlrName.slice(0, 3);
+            if (otherPlrName.length >= 3) {
+                cloudX = 160;
+            }
+            if (otherPlrName.length > 3) {
+                croppedOtherPlrName = otherPlrName.slice(0, 3) + "..";
+                textSize(22.5);
+            }
+            else {
+                textSize(42.5);
+            }
+            text(croppedOtherPlrName, 290, 240);
+        }
     }
     // Movement of the crown
     {
@@ -582,39 +596,105 @@ function showWinMessage() {
         image(cloud, cloudX2, cloudY, (5277 / 80), (3745 / 80));
     }
     pop();
-    winTxt.show();
+    endTxt.show();
 }
 
-function calculateWinMsgPlrTextValues() {
-    // To-do: remove below line on finalization
-    fill("lightgreen");
-    plrName = "OOOOOOOO";
-    croppedPlrname = plrName.slice(0, 3);
-    if (plrName.length >= 3) {
-        crownX = 160;
+function showLoseMessage() {
+    stopAllSprites();
+    endGameBtn.show();
+    cancelGameMovement = true;
+    var maxCrownY = 160;
+    var maxCloudX1 = 125;
+    var maxCloudX2 = 165;
+    endTxt.html("You lose! No problem, try again <br> to beat your opponents and by practising more").style("font-size", "11px").position(130, 130);
+    push();
+    // Message box
+    {
+        push();
+        rectMode(CENTER);
+        fill("black");
+        rect(250, 200, 250, 130);
+        pop();
     }
-    if (plrName.length > 3) {
-        croppedPlrname = plrName.slice(0, 3) + "..";
-        textSize(50);
+    // Show the encouragement text
+    // Show player tags
+    {
+        textSize(15);
+        fill("darkblue");
+        push();
+        stroke("white");
+        strokeWeight(1.5);
+        text("You", 130, 260);
+        text("Opponent", 280, 260);
+        pop();
     }
-    else {
-        textSize(70)
+    // Define the values of formatting and show text
+    {
+        {
+            fill("lightgreen");
+            // To-do: remove below line on finalization
+            plrName = "OOOOOOOO";
+            croppedPlrname = plrName.slice(0, 3);
+            if (plrName.length >= 3) {
+                crownX = 300;
+            }
+            if (plrName.length > 3) {
+                croppedPlrname = plrName.slice(0, 3) + "..";
+                textSize(22.5);
+            }
+            else {
+                textSize(42.5)
+            }
+            text(croppedPlrname, 135, 240);
+        }
+        {
+            fill("magenta");
+            // To-do: remove below line on finalization
+            otherPlrName = "PPPPPPPPPPPP";
+            croppedOtherPlrName = otherPlrName.slice(0, 3);
+            if (otherPlrName.length >= 3) {
+                cloudX = 160;
+            }
+            if (otherPlrName.length > 3) {
+                croppedOtherPlrName = otherPlrName.slice(0, 3) + "..";
+                textSize(50);
+            }
+            else {
+                textSize(70);
+            }
+            text(croppedOtherPlrName, 250, 240);
+        }
     }
+    // Movement of the crown
+    {
+        push();
+        translate(crownX, crownY);
+        if (crownY < maxCrownY) {
+            crownY += 6;
+            crownRotation += 0.41;
+        }
+        rotate(crownRotation);
+        image(crown, 0, 0, (1329 / 10 / 2.2), (980 / 10 / 2.2));
+        pop();
+    }
+    // Movement of the cloud
+    {
+        if (cloudX1 < maxCloudX1) {
+            cloudX1 += 6;
+        }
+        if (cloudX2 > maxCloudX2) {
+            cloudX2 -= 5;
+        }
+        image(cloud, cloudX1, cloudY, (5277 / 80), (3745 / 80));
+        image(cloud, cloudX2, cloudY, (5277 / 80), (3745 / 80));
+    }
+    pop();
+    endTxt.show();
 }
 
-function calculateWinMsgOtherPlrTextValues() {
-    // To-do: remove below line on finalization
-    fill("magenta");
-    otherPlrName = "PPPPPPPPPPPP";
-    croppedOtherPlrName = otherPlrName.slice(0, 3);
-    if (otherPlrName.length >= 3) {
-        cloudX = 160;
-    }
-    if (otherPlrName.length > 3) {
-        croppedOtherPlrName = otherPlrName.slice(0, 3) + "..";
-        textSize(22.5);
-    }
-    else {
-        textSize(42.5);
+function stopAllSprites() {
+    for (var i in allSprites) {
+        allSprites[i].velocityX = 0;
+        allSprites[i].velocityY = 0;
     }
 }

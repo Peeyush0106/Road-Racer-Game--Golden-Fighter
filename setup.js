@@ -1,14 +1,14 @@
 // Initial Variable Declaration
 var road, fuelLeft, fuelShow,
     stars, startTimerShow, rightEdgeX, leftEdgeX, laneX,
-    edgesLev1, rightEdgeLev1, leftEdgeLev1, startCounter, touchingCounter,
+    edges, rightEdge, leftEdge, startCounter, touchingCounter,
     gameState, distanceTravelled, finishLine, playerCar, blueCars, redCars, cancelAllCommands,
     fuelCars, collidedBlueCars, collidedRedCars, sec, nameInp, carShowFlag1, carShowFlag2,
     maxBlueCars, maxRedCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
-    blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playersEntered, playerCount, playCliked, playerData, unloading,
+    blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading,
     passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, giveUp,
-    blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, winTxt, crown, crownX, crownRotation,
-    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLooseSent, giveUpSet, cloud, looser, playInfoSet;
+    blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation,
+    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame;
 
 function preload() {
     gameLoaded = false;
@@ -37,13 +37,20 @@ function preload() {
     goIMG = loadImage("images/go.png");
     crown = loadImage("images/crown.webp");
     cloud = loadImage("images/cloud.jpg");
+    logo = loadImage("images/Logo.png");
 }
 
 function setup() {
     createCanvas(500, 400);
+    // Alerting the player for the ways as to how to go further and get in the game.
+    // IMPORTANT: The two arrows have not been indented because they were getting indented in the alert as well
+    alert(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
+---> If you want to create a new account, click on 'Create a new account'
+---> If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :) Hopw you will enjoy this game. Thanks for your attention.`);
     // Database setup
     database = firebase.database();
     // Initial Variable Declaration
+    // road
     road = createSprite(200, 220);
     bgIMG.width = 400;
     bgIMG.height = 600;
@@ -51,39 +58,12 @@ function setup() {
     road.width = 400;
     road.height = 600;
 
+    // map at the left
     carShowFlags = [];
     map1 = makeMap(10, 360, img9, 0.08, null,
         10, 20, finalFlagPathShowIMG, 0.08, 45);
     carShowFlag1 = carShowFlags[0];
     carShowFlag2 = carShowFlags[1];
-
-    fuelLeft = 500000;
-    fuelShow = 0;
-
-    // winning animation definitions
-    {
-        // crown
-        {
-            crownX = 130;
-            crownY = 50;
-            crownRotation = 0;
-        }
-        // cloud
-        {
-            cloudX1 = 50;
-            cloudX2 = 450;
-            cloudY = 180;
-        }
-    }
-
-    stars = 12;
-    gameStarted = false;
-    plrCntDecreased = false;
-    myLooseSent = false;
-    giveUpSet = false;
-    cancelCheckingOtherPlayerLoosing = false;
-    showedWinMessage = false;
-    playInfoSet = false;
 
     function makeMap(x1, y1, anim1, scale1, rotate1, x2, y2, anim2, scale2, rotate2) {
         carShowFlag = createSprite(x2, y2);
@@ -101,27 +81,62 @@ function setup() {
         return carShowPath;
     }
 
+    // fuel
+    fuelLeft = 500000;
+    fuelShow = 0;
+
+    // other variables used to control
+    stars = 12;
+    gameStarted = false;
+    plrCntDecreased = false;
+    myLoseSent = false;
+    giveUpSet = false;
+    cancelCheckingOtherPlayerLoosing = false;
+    showedWinMessage = false;
+    playInfoSet = false;
+    msgPositionsSet = false;
+    cancelGameMovement = false;
+    leavingGame = false;
+    startCounter = 0;
+    touchingCounter = 0;
+    gameState = "gettingStarted";
+    distanceTravelled = 0;
+
+    // winning animation definitions
+    {
+        // crown
+        {
+            crownX = 130;
+            crownY = 50;
+            crownRotation = 0;
+        }
+        // cloud
+        {
+            cloudX1 = 50;
+            cloudX2 = 450;
+            cloudY = 180;
+        }
+    }
+
+    // timer - 3, 2, 1
     startTimerShow = createSprite(225, 200);
     startTimerShow.visible = false;
     goIMG.width = 144;
     goIMG.height = 81.8;
 
+    // Edges
     rightEdgeX = 306;
     leftEdgeX = 137;
     laneX = [leftEdgeX + 29, 196 + 28, 251 + 26];
 
-    edgesLev1 = createGroup();
-    rightEdgeLev1 = createSprite(rightEdgeX, 200, 5, 400);
-    leftEdgeLev1 = createSprite(leftEdgeX, 200, 5, 400);
-    edgesLev1.add(rightEdgeLev1);
-    edgesLev1.add(leftEdgeLev1);
-    edgesLev1.setVisibleEach(false);
+    edges = createGroup();
+    rightEdge = createSprite(rightEdgeX, 200, 5, 400);
+    leftEdge = createSprite(leftEdgeX, 200, 5, 400);
+    edges.add(rightEdge);
+    edges.add(leftEdge);
+    edges.setVisibleEach(false);
 
-    startCounter = 0;
-    touchingCounter = 0;
-    gameState = "gettingStarted";
-
-    distanceTravelled = 0;
+    // Finish line
     finishLine = createSprite(220, 100);
     finishLine.visible = false;
 
@@ -135,17 +150,20 @@ function setup() {
     collidedBlueCars = createGroup();
     collidedRedCars = createGroup();
 
+    // No of other cars in game
     maxBlueCars = 8;
     maxRedCars = 8;
     maxfuelCars = 5;
 
+    // velocities of other cars
     blueCarVelocity = random(5, 7);
     redCarVelocity = random(5, 7);
     fuelCarVelocity = random(4.5, 6.5);
 
-    blueCarSpacing = 500;
-    redCarSpacing = 500;
-    fuelCarSpacing = 1150;
+    // Y Offset for the starting of cars
+    blueCarSpacing = 100;
+    redCarSpacing = 100;
+    fuelCarSpacing = 750;
 
     nameChecked = false;
 
@@ -156,13 +174,17 @@ function setup() {
     nameText = createElement("h5").position(10, 10).html("Your gaming name: ");
     pwdText = createElement("h4").position(10, 35).html("Your password: ");
 
-    info_text = createElement('h5').position(10, 70).html("If you want to create a new account, click on 'Create a new account'");
+    info_text = createElement('h5').position(10, 70).html("");
 
-    info_text2 = createElement('h6').position(10, 85).html("If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :)").style("font-size", "10px");
+    info_text2 = createElement('h6').position(10, 85).html("").style("font-size", "10px");
 
     waitingTxt = createElement('h5').position(10, 70).html("Waiting for another player...").hide();
 
-    winTxt = createElement('h5').position(145, 120).style("color", "red").html("You win!!! Amazing drving.. <br> You can continue playing if you want.").hide();
+    endTxt = createElement('h5').position(130, 120).style("color", "red").html("You win!!! Amazing driving..").hide();
+
+    endGameBtn = createButton("End Game").position(200, 250).style("background-color", "red").style("color", "white").style("font-size", "10px").mousePressed(function () {
+        location.reload();
+    }).hide();
 
     createAccount = createButton("Create a new account").position(250, 30).style("background-color", "red").style("color", "white").mousePressed(function () {
         if (!cancelAllCommands) {

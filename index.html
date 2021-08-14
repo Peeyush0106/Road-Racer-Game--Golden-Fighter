@@ -2,68 +2,54 @@
 <html lang="en" dir="ltr">
 
 <head>
-  <meta charset="utf-8">
-  <title>Road Racer Game</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
+	<meta charset="utf-8">
+	<title>Road Racer Game</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"></script>
 
-  <script src="p5.play.js"></script>
-  <script src="p5.dom.min.js"></script>
-  <script src="p5.sound.min.js"></script>
+	<script src="p5.play.js"></script>
+	<script src="p5.dom.min.js"></script>
+	<script src="p5.sound.min.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-database.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css" />
+	<script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.6.3/firebase-database.js"></script>
 
-  <script>
-    // Your web app's Firebase configuration
-    var firebaseConfig = {
-      apiKey: "AIzaSyCs_4HQVYkhTu7ZXBdCNNusgUsXv4_9PKo",
-      authDomain: "road-racing-game.firebaseapp.com",
-      projectId: "road-racing-game",
-      storageBucket: "road-racing-game.appspot.com",
-      messagingSenderId: "797510430003",
-      appId: "1:797510430003:web:201053ced178501b002246"
-    };
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-  </script>
+	<script>
+		// Your web app's Firebase configuration
+		var firebaseConfig = {
+			apiKey: "AIzaSyCs_4HQVYkhTu7ZXBdCNNusgUsXv4_9PKo",
+			authDomain: "road-racing-game.firebaseapp.com",
+			projectId: "road-racing-game",
+			storageBucket: "road-racing-game.appspot.com",
+			messagingSenderId: "797510430003",
+			appId: "1:797510430003:web:201053ced178501b002246"
+		};
+		// Initialize Firebase
+		firebase.initializeApp(firebaseConfig);
+	</script>
 </head>
 
 <body>
-  <script src="setup.js"></script>
-  <script src="gameFunctions.js"></script>
-  <script src="sketch.js"></script>
-  <details id="play-info" hidden="true" style="font-size: 12.5px;" open="true">
-    <summary style="color: red;">
-      What to do
-      <br> for winning?
-    </summary>
-    <div style="color: greenyellow;">
-      Try to reach
-      <br>
-      the goal before 
-      <br>
-      <div style="font-size: 47.5px; color: blue; background-color: cornsilk;">
-        100
-      </div>
-      seconds, you
-      <br>
-      have to travel 2
-      <br>
-      KM distance, a
-      <br>
-      star is the
-      <br>
-      most helpful
-      <br>
-      to buy fuel.
-      Hit
-      <br>
-      the fuel car to
-      <br>
-      buy fuel!
-    </div>
-  </details>
+	<script src="setup.js"></script>
+	<script src="gameFunctions.js"></script>
+	<script src="sketch.js"></script>
+	<script src="loading.js"></script>
+	<!-- Details of how to win the game -->
+	<details id="play-info" hidden="true" style="font-size: 12.5px;" open="true">
+		<summary style="color: red;">
+			What to do
+			<br> for winning?
+		</summary>
+		<div style="color: greenyellow;">
+			Try to reach <br> the goal before <br>
+			<div style="font-size: 47.5px; color: blue; background-color: cornsilk;">
+				100
+			</div> seconds, you <br> have to travel 2 <br> KM distance, a <br> star is the <br> most helpful
+			<br> to buy
+			fuel. Hit
+			<br> the fuel car to <br> buy fuel!
+		</div>
+	</details>
 </body>
 
 </html>

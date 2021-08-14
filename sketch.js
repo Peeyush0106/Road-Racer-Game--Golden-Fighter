@@ -1,53 +1,71 @@
 // Our main draw functin to control each and every part
 function draw() {
     image(goIMG, 200, 200)
-    collidedBlueCars.setLifetimeEach(40);
-    collidedRedCars.setLifetimeEach(40);
+    collidedBlueCars.setLifetimeEach(2.2);
+    collidedRedCars.setLifetimeEach(2.2);
+    if(!gameStarted){
+        image();
+    }
     if (gameLoaded && gameStarted) {
         background("black");
-        updateMyGamingStatus();
-        sec = World.seconds - secondTimeDiff;
-        playersEntered = playerCount;
-        if (!playInfoSet) {
-            document.getElementById("play-info").hidden = false;
-            select("#play-info").position(405, 30);
-            playInfoSet = true;
-        }
-        if (!giveUpSet) {
-            giveUp.position(400, 350);
-            giveUpSet = true;
-            giveUp.hide();
-        }
-        if (!cancelCheckingOtherPlayerLoosing) {
-            getOtherPlayerLoosing();
-        }
-        // Set some continuous properties
-        map1.setVelocity(0, -1 * (road.velocityY / 53));
-        if (playerData !== undefined) {
-            for (let j = 1; j <= playerCount; j++) {
-                console.log(j);
-                if (playerData[j] !== undefined && playerData[j].name !== undefined && plrName === playerData[j].name) {
-                    continue;
-                }
-                if (playerData[j] !== undefined) {
-                    playerCarOther.y = playerData[j].y;
+        if (!cancelGameMovement) {
+            updateMyGamingStatus();
+            sec = World.seconds - secondTimeDiff;
+            if (!playInfoSet) {
+                document.getElementById("play-info").hidden = false;
+                select("#play-info").position(405, 30);
+                playInfoSet = true;
+            }
+            if (!giveUpSet) {
+                giveUp.position(400, 350);
+                giveUpSet = true;
+                giveUp.hide();
+            }
+            if (!cancelCheckingOtherPlayerLoosing) {
+                getOtherPlayerLoosing();
+            }
+            // Set some continuous properties
+            map1.setVelocity(0, -1 * (road.velocityY / 53));
+            if (playerData !== undefined) {
+                for (let j = 1; j <= playerCount; j++) {
+                    console.log(j);
+                    if (playerData[j] !== undefined && playerData[j].name !== undefined && plrName === playerData[j].name) {
+                        continue;
+                    }
+                    if (playerData[j] !== undefined) {
+                        playerCarOther.y = playerData[j].y;
+                    }
                 }
             }
-        }
-        fuelShow = Math.round((fuelLeft / 10000));
+            fuelShow = Math.round((fuelLeft / 10000));
 
-        //  Control game with conditional programming
+            //  Control game with conditional programming
 
-        // When the game is won
-        if (playerCar.y < 0 - (playerCar.width / 2)) {
-            blueCars.destroyEach();
-            redCars.destroyEach();
-            playerCar.destroy();
-            gameState = "win";
+            // When the game is won
+            if (playerCar.y < 0 - (playerCar.width / 2)) {
+                blueCars.destroyEach();
+                redCars.destroyEach();
+                playerCar.destroy();
+                gameState = "win";
+            }
         }
 
         // Draw our sprites
         drawSprites();
+
+        // When the game is lost
+        if (gameState === "over") {
+            showLoseMessage();
+            graduallyDecreaseSpeed();
+            database.ref("Playing/players/" + plrIndex).update({
+                lost: true
+            });
+            if (!plrCntDecreased) {
+                playerCount -= 1;
+                updatePlayerCount(playerCount);
+                plrCntDecreased = true;
+            }
+        }
 
         if (otherPlrLost) {
             push();
@@ -64,217 +82,200 @@ function draw() {
             showWinMessage();
         }
 
-        // When the game is running, not won or lost
-        if (gameState != "win" && gameState != "over") {
-            push();
-            strokeWeight(4);
+        if (!cancelGameMovement) {
 
-            stroke("lightgreen");
-            fill("lightgreen");
-            line(carShowFlag1.x, carShowFlag1.y, map1.x, map1.y);
-            triangle(carShowFlag1.x, carShowFlag1.y, carShowFlag1.x - 6, carShowFlag1.y + 9, carShowFlag1.x + 6, carShowFlag1.y + 9);
-            point(map1.x, map1.y);
+            // When the game is running, not won or lost
+            if (gameState != "win" && gameState != "over") {
+                push();
+                strokeWeight(4);
 
-            fill("blue");
-            rect(70, 5, 260, 60);
-            stroke("red");
-            strokeWeight(3);
-            fill("yellow");
+                stroke("lightgreen");
+                fill("lightgreen");
+                line(carShowFlag1.x, carShowFlag1.y, map1.x, map1.y);
+                triangle(carShowFlag1.x, carShowFlag1.y, carShowFlag1.x - 6, carShowFlag1.y + 9, carShowFlag1.x + 6, carShowFlag1.y + 9);
+                point(map1.x, map1.y);
 
-            text("Fuel: " + fuelShow + "L", 75, 20);
-            text("Stars: " + stars, 75, 40);
-            text("Speed: " + Math.round(road.velocityY * 10) + " Km/Hr", 75, 60);
-            text("Distance Travelled: " + distanceTravelled + "0 M", 185, 20);
-            text("Time Elapsed: " + sec + " Sec", 185, 40);
-            text("To travel more: " + (200 - distanceTravelled + "0 M"), 185, 60);
+                fill("blue");
+                rect(70, 5, 260, 60);
+                stroke("red");
+                strokeWeight(3);
+                fill("yellow");
 
-            push();
-            stroke("yellow");
-            strokeWeight(2);
-            line(180, 5, 180, 65);
-            line(70, 25, 330, 25);
-            line(70, 45, 330, 45);
-            pop();
+                text("Fuel: " + fuelShow + "L", 75, 20);
+                text("Stars: " + stars, 75, 40);
+                text("Speed: " + Math.round(road.velocityY * 10) + " Km/Hr", 75, 60);
+                text("Distance Travelled: " + distanceTravelled + "0 M", 185, 20);
+                text("Time Elapsed: " + sec + " Sec", 185, 40);
+                text("To travel more: " + (200 - distanceTravelled + "0 M"), 185, 60);
 
-            recreateOvertakenCars();
-        }
+                push();
+                stroke("yellow");
+                strokeWeight(2);
+                line(180, 5, 180, 65);
+                line(70, 25, 330, 25);
+                line(70, 45, 330, 45);
+                pop();
 
-        // When the playerCar wants to pick up fuel
-        if (fuelCars.isTouching(playerCar)) {
-            fuelReload();
-        }
-
-        // Set speeds of our cars
-        controlWorldCarsVelocity();
-
-        // WHen the game is lost
-        if (gameState === "over") {
-            fill("green");
-            rect(2.5, 147.5, 400, 30);
-            textSize(25);
-            strokeWeight(2);
-            stroke("yellow");
-            fill("blue");
-            text("Game Over! Refresh to Play Again..", 7.5, 170);
-            graduallyDecreaseSpeed();
-            database.ref("Playing/players/" + plrIndex).update({
-                lost: true
-            });
-            if (!plrCntDecreased) {
-                playerCount -= 1;
-                updatePlayerCount(playerCount);
-                plrCntDecreased = true;
+                recreateOvertakenCars();
             }
-        }
 
-        // When the game is won
-        if (gameState === "win") {
-            fill("green");
-            rect(50, 147.5, 300, 60);
-            textSize(25);
-            strokeWeight(2);
-            stroke("yellow");
-            fill("red");
-            text("Yeah! You Won the Game!", 55, 170);
-            text("Refresh to play again!", 55, 200);
-            if (!plrCntDecreased) {
-                playerCount -= 1;
-                updatePlayerCount(playerCount);
-                plrCntDecreased = true;
+            // When the playerCar wants to pick up fuel
+            if (fuelCars.isTouching(playerCar)) {
+                fuelReload();
             }
-        }
 
-        // If 60 frames have past after the playerCar touched any obstacle
-        if (touchingCounter > 60) {
-            gameState = "allReset";
-            touchingCounter = 0;
-            // Recreating playerCar
-            playerCar.destroy();
-            createPlayerCar();
-        }
+            // Set speeds of our cars
+            controlWorldCarsVelocity();
 
-        // When the car hit an obstacle
-        if (gameState === "car-hit") {
-            touchingCounter = touchingCounter + 1;
-        }
-
-        // If the game didn't yet start, the timer's on
-        if (gameState === "startedAndMoving") {
-            startTimerShow.visible = true;
-            if (sec) {
-                if (sec === 1) {
-                    startTimerShow.addImage("image", timer3IMG);
-                    startTimerShow.visible = true;
+            // When the game is won
+            if (gameState === "win") {
+                fill("green");
+                rect(50, 147.5, 300, 60);
+                textSize(25);
+                strokeWeight(2);
+                stroke("yellow");
+                fill("red");
+                text("Yeah! You Won the Game!", 55, 170);
+                text("Refresh to play again!", 55, 200);
+                if (!plrCntDecreased) {
+                    playerCount -= 1;
+                    updatePlayerCount(playerCount);
+                    plrCntDecreased = true;
                 }
-                if (sec === 2) {
-                    startTimerShow.addImage("image", timer2IMG);
-                    startTimerShow.visible = true;
-                }
-                if (sec === 3) {
-                    startTimerShow.addImage("image", timer1IMG);
-                    startTimerShow.visible = true;
-                }
-                if (sec === 4) {
-                    startTimerShow.addImage("image", goIMG);
-                    startTimerShow.visible = true;
-                }
-                startCounter = startCounter + 0.5;
             }
-            else {
+
+            // If 60 frames have past after the playerCar touched any obstacle
+            if (touchingCounter > 60) {
+                gameState = "allReset";
+                touchingCounter = 0;
+                // Recreating playerCar
+                playerCar.destroy();
+                createPlayerCar();
+            }
+
+            // When the car hit an obstacle
+            if (gameState === "car-hit") {
+                touchingCounter = touchingCounter + 1;
+            }
+
+            // If the game didn't yet start, the timer's on
+            if (gameState === "startedAndMoving") {
+                startTimerShow.visible = true;
+                if (sec) {
+                    if (sec === 1) {
+                        startTimerShow.addImage("image", timer3IMG);
+                        startTimerShow.visible = true;
+                    }
+                    if (sec === 2) {
+                        startTimerShow.addImage("image", timer2IMG);
+                        startTimerShow.visible = true;
+                    }
+                    if (sec === 3) {
+                        startTimerShow.addImage("image", timer1IMG);
+                        startTimerShow.visible = true;
+                    }
+                    if (sec === 4) {
+                        startTimerShow.addImage("image", goIMG);
+                        startTimerShow.visible = true;
+                    }
+                    startCounter = startCounter + 0.5;
+                }
+                else {
+                    startTimerShow.visible = false;
+                }
+            }
+            if (sec > 4) {
                 startTimerShow.visible = false;
-            }
-        }
-        if (sec > 4) {
-            startTimerShow.visible = false;
-            giveUp.elt.innerText = "Give Up";
-            giveUp.show();
-        }
-
-        // Control of cars when the game has just started
-        if (gameState != "car-hit"
-            && gameState != "over"
-            && gameState != "waiting"
-            && sec >= 4
-            && !playerCar.isTouching(edgesLev1)
-            && !playerCar.isTouching(redCars)
-            && !playerCar.isTouching(blueCars)) {
-            gameState = "startedAndMoving";
-            if (fuelShow > 0) {
-                gamingControlsUpDown();
+                giveUp.elt.innerText = "Give Up";
+                giveUp.show();
             }
 
-            // What all conditions make the game over
-            if (fuelShow <= 0 || sec > 100 || stars <= 0) {
-                gameState = "over";
+            // Control of cars when the game has just started
+            if (gameState != "car-hit"
+                && gameState != "over"
+                && gameState != "waiting"
+                && sec >= 4
+                && !playerCar.isTouching(edges)
+                && !playerCar.isTouching(redCars)
+                && !playerCar.isTouching(blueCars)) {
+                gameState = "startedAndMoving";
+                if (fuelShow > 0) {
+                    gamingControlsUpDown();
+                }
+
+                // What all conditions make the game over
+                if (fuelShow <= 0 || sec > 100 || stars <= 0) {
+                    gameState = "over";
+                }
             }
-        }
 
-        // When the player car is touching the obstacles
-        if (playerCar.isTouching(edgesLev1)
-            || playerCar.isTouching(redCars)
-            || playerCar.isTouching(blueCars)
-            || playerCar.isTouching(collidedBlueCars)
-            || playerCar.isTouching(collidedRedCars)) {
-            gameState = "car-hit";
-            playerCar.collide(edgesLev1);
-            // playerCar.collide(redCars);
-            // playerCar.collide(blueCars);
-            // playerCar.collide(collidedBlueCars);
-            // playerCar.collide(collidedRedCars);
-            graduallyDecreaseSpeed();
-            carHit();
-        }
-
-        // The road image to reset and the distance to increase
-        if (road.y > 280) {
-            road.y = 210;
-            distanceTravelled = distanceTravelled + 1;
-        }
-
-        // WHat al coditions make the game win
-        if (distanceTravelled > 199 && sec < 100 && stars > 0) {
-            finishLine.visible = true;
-            playerCar.depth = 100;
-            finishLine.addImage("image", finLineIMG);
-            finishLine.scale = 0.25;
-            graduallyDecreaseSpeed();
-            gameState = "win";
-            if (background.velocityY === 0) {
-                road.setVelocity(0, 0);
+            // When the player car is touching the obstacles
+            if (playerCar.isTouching(edges)
+                || playerCar.isTouching(redCars)
+                || playerCar.isTouching(blueCars)
+                || playerCar.isTouching(collidedBlueCars)
+                || playerCar.isTouching(collidedRedCars)) {
+                gameState = "car-hit";
+                playerCar.collide(edges);
+                // playerCar.collide(redCars);
+                // playerCar.collide(blueCars);
+                // playerCar.collide(collidedBlueCars);
+                // playerCar.collide(collidedRedCars);
+                graduallyDecreaseSpeed();
+                carHit();
             }
-            playerCar.setVelocity(0, -3);
-            playerCar.rotationSpeed = 0;
-        }
 
-        // When the car is currently running
-        if (gameState === "startedAndMoving" && road.velocityY > 0) {
-            gamingControlsLR();
-        }
+            // The road image to reset and the distance to increase
+            if (road.y > 280) {
+                road.y = 210;
+                distanceTravelled = distanceTravelled + 1;
+            }
 
-        // When any obstacle touches any other obstacle
+            // WHat al coditions make the game win
+            if (distanceTravelled > 199 && sec < 100 && stars > 0) {
+                finishLine.visible = true;
+                playerCar.depth = 100;
+                finishLine.addImage("image", finLineIMG);
+                finishLine.scale = 0.25;
+                graduallyDecreaseSpeed();
+                gameState = "win";
+                if (background.velocityY === 0) {
+                    road.setVelocity(0, 0);
+                }
+                playerCar.setVelocity(0, -3);
+                playerCar.rotationSpeed = 0;
+            }
 
-        // For blue and red.
-        if (blueCars.isTouching(redCars) || redCars.isTouching(blueCars)) {
-            // Handle blue and red collided cars
-            handleCollidedCars();
-            // The car that touched the other car from behind, will stop.
-        }
+            // When the car is currently running
+            if (gameState === "startedAndMoving" && road.velocityY > 0) {
+                gamingControlsLR();
+            }
 
-        // Blue car with fuel car
-        if (blueCars.isTouching(fuelCars)) {
-            // Blue car reloads its fuel capacity
-            fuelReloadBlueCar();
-        }
+            // When any obstacle touches any other obstacle
 
-        // Red car with fuel car
-        if (redCars.isTouching(fuelCars)) {
-            fuelReloadRedCar();
-        }
+            // For blue and red.
+            if (blueCars.isTouching(redCars) || redCars.isTouching(blueCars)) {
+                // Handle blue and red collided cars
+                handleCollidedCars();
+                // The car that touched the other car from behind, will stop.
+            }
 
-        //  An already collided car can also reload its fuel
-        if (collidedBlueCars.isTouching(fuelCars) || collidedRedCars.isTouching(fuelCars)) {
-            // When it touches fuel, its fuel reloads
-            fuelReloadCollidedCar();
+            // Blue car with fuel car
+            if (blueCars.isTouching(fuelCars)) {
+                // Blue car reloads its fuel capacity
+                fuelReloadBlueCar();
+            }
+
+            // Red car with fuel car
+            if (redCars.isTouching(fuelCars)) {
+                fuelReloadRedCar();
+            }
+
+            //  An already collided car can also reload its fuel
+            if (collidedBlueCars.isTouching(fuelCars) || collidedRedCars.isTouching(fuelCars)) {
+                // When it touches fuel, its fuel reloads
+                fuelReloadCollidedCar();
+            }
         }
     }
     else {
@@ -323,5 +324,8 @@ function draw() {
             playerCarOther.scale = 0.04;
             playerCarOther.tint = rgb(random(100, 200), random(100, 200), random(100, 200));
         }
+    }
+    if (gameState === "waiting") {
+        showLoadingAnim();
     }
 }
