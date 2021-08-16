@@ -676,7 +676,7 @@ function createVirtualArrowKeys() {
             playerCar.x += ((road.velocityY / 2));
         }
     });
-    toggleHiddenArrows(true);
+    // toggleHiddenArrows(true);
 }
 
 function toggleHiddenArrows(show) {

@@ -7,7 +7,7 @@ function draw() {
         if (!gotOtherPlrName) {
             getOtherPlrName();
         }
-        toggleHiddenArrows(true);
+        // toggleHiddenArrows(true);
         startBgMusic = "no-not the right time";
         bgMusic.setVolume(0.1);
         background("black");
