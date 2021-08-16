@@ -8,7 +8,7 @@ function draw() {
         if (!gotOtherPlrName) {
             getOtherPlrName();
         }
-        if (playerCount < 2) {
+        if (gameState !== 'over' && gameState !== 'win' && playerCount < 2) {
             gameState = 'win';
         }
         // toggleHiddenArrows(true);
@@ -58,6 +58,7 @@ function draw() {
                 lost: true
             });
             if (!plrCountUpdated) {
+                console.log("Decreasing PLR Count");
                 playerCount -= 1;
                 updatePlayerCount(playerCount);
                 plrCountUpdated = true;
@@ -76,9 +77,8 @@ function draw() {
             giveUp.hide();
             showedWinMessage = true;
             cancelCheckingOtherPlayerLoosing = true;
-            otherPlrLost = true;
             database.ref("Playing/players/" + otherPlrIndex).remove();
-            showWinMessage();
+            gameState = "win";
         }
 
         // When the game is won

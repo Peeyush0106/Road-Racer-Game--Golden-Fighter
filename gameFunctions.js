@@ -67,8 +67,10 @@ function createWorldVehicles() {
 
 // Control the speed of our cars
 function controlWorldCarsVelocity() {
-    otherCars.setVelocityYEach(road.velocityY - otherCarVelocity);
-    otherCarVelocity = random(5, 7);
+    for (var i = 0; i < otherCars.length; i++) {
+        otherCarVelocity = random(5, 7);
+        otherCars.get(i).setVelocity(0, road.velocityY - otherCarVelocity);
+    }
     fuelCars.setVelocityYEach(road.velocityY - fuelCarVelocity);
     collidedOtherCars.destroyEach();
 }
@@ -246,14 +248,14 @@ async function checkPasswordAndNameErr() {
     if (pwd === "" && !cancelAllCommands) {
         cancelAllCommands = true;
         alertSnd.play();
-alert("Please enter a valid password");
+        alert("Please enter a valid password");
         location.reload();
         noLoop();
     }
     if (name === "" && !cancelAllCommands) {
         cancelAllCommands = true;
         alertSnd.play();
-alert("Please enter a valid name");
+        alert("Please enter a valid name");
         location.reload();
         noLoop();
     }
@@ -321,7 +323,7 @@ async function getPlayerCount() {
         await database.ref("/playerCount").get().then(function (data) {
             if (data.exists()) {
                 playerCount = data.val();
-            }            
+            }
         }).catch(function (error) {
             console.error(error);
         });
@@ -563,7 +565,7 @@ function showLoseMessage() {
     endTxt.show();
     if (!showedOhhYouLostAlert) {
         alertSnd.play();
-alert("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or the time of 100 seconds has passed. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
+        alert("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or the time of 100 seconds has passed. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
         showedOhhYouLostAlert = true;
     }
 }
@@ -593,7 +595,7 @@ function checkIfOtherPlayerLeftAndThenLeaveMyGame() {
     database.ref("Alerts/" + plrIndex + "/otherPlrLeft").get().then((data) => {
         if (data.exists()) {
             alertSnd.play();
-alert("You win!! The other player has resigned, even you will have to end this game.");
+            alert("You win!! The other player has resigned, even you will have to end this game.");
             location.reload();
         }
     });
