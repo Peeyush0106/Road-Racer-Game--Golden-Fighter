@@ -245,13 +245,15 @@ async function checkPasswordAndNameErr() {
     var name = inputName.value();
     if (pwd === "" && !cancelAllCommands) {
         cancelAllCommands = true;
-        alertMsg("Please enter a valid password");
+        alertSnd.play();
+alert("Please enter a valid password");
         location.reload();
         noLoop();
     }
     if (name === "" && !cancelAllCommands) {
         cancelAllCommands = true;
-        alertMsg("Please enter a valid name");
+        alertSnd.play();
+alert("Please enter a valid name");
         location.reload();
         noLoop();
     }
@@ -319,10 +321,7 @@ async function getPlayerCount() {
         await database.ref("/playerCount").get().then(function (data) {
             if (data.exists()) {
                 playerCount = data.val();
-            }
-            else {
-
-            }
+            }            
         }).catch(function (error) {
             console.error(error);
         });
@@ -331,13 +330,14 @@ async function getPlayerCount() {
 
 window.onbeforeunload = function () {
     if (gameState !== "over"
-        && gameState !== "win") {
+        && gameState !== "win"
+        && gameState !== "gettingStarted") {
         playerCount = 0;
         database.ref("/").update({
             playerCount: playerCount
         });
         database.ref("Playing/players").remove();
-        plrCntDecreased = true;
+        plrCountUpdated = true;
         unloading = true;
         // confirmMsg("Are you sure you want to resign?");
         // database.ref("Alerts/" + otherPlrIndex).update({
@@ -373,7 +373,7 @@ async function getAllPlayersGamingStatus() {
     });
 }
 
-async function getOtherPlayerLoosing() {
+async function getOtherPlayerLosing() {
     await database.ref("/Playing/players/" + otherPlrIndex + "/lost").get().then(function (data) {
         if (data.exists()) {
             otherPlrLost = data.val();
@@ -562,7 +562,8 @@ function showLoseMessage() {
     pop();
     endTxt.show();
     if (!showedOhhYouLostAlert) {
-        alertMsg("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or the time of 100 seconds has passed. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
+        alertSnd.play();
+alert("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or the time of 100 seconds has passed. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
         showedOhhYouLostAlert = true;
     }
 }
@@ -583,7 +584,7 @@ function loseOtherPlayer() {
 function checkIfOtherPlayerWonAndThenLoseMe() {
     database.ref("Playing/players/" + plrIndex + "/otherPlrWon").get().then((data) => {
         if (data.exists()) {
-            showLoseMessage();
+            gameState = 'over';
         }
     });
 }
@@ -591,7 +592,8 @@ function checkIfOtherPlayerWonAndThenLoseMe() {
 function checkIfOtherPlayerLeftAndThenLeaveMyGame() {
     database.ref("Alerts/" + plrIndex + "/otherPlrLeft").get().then((data) => {
         if (data.exists()) {
-            alertMsg("You win!! The other player has resigned, even you will have to end this game.");
+            alertSnd.play();
+alert("You win!! The other player has resigned, even you will have to end this game.");
             location.reload();
         }
     });
@@ -604,16 +606,6 @@ function getOtherPlrName() {
             gotOtherPlrName = true;
         }
     });
-}
-
-function alertMsg(message) {
-    alertSnd.play();
-    alert(message);
-}
-
-function alertMsg(message) {
-    alertSnd.play();
-    confirm(message);
 }
 
 function updateMyFuelLeft() {
@@ -655,41 +647,46 @@ function isUserOnTouchScreenDevice() {
 }
 
 function createVirtualArrowKeys() {
-    upArrow = createButton("🠕").position(250, 400).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
-        if (gameState != "over" && gameState != "win") {
-            controlBackgroundSpeed();
-            if (fuelLeft > 0) {
-                fuelLeft = fuelLeft - 1200;
-            }
-        }
-    });
-    downArrow = createButton("🠗").position(250, 451.5).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
-        graduallyDecreaseSpeed();
-    });
-    leftArrow = createButton("🠔").position(202, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
-        if (gameState != "over" && gameState != "win") {
-            playerCar.x -= ((road.velocityY / 2));
-        }
-    });
-    rightArrow = createButton("🠖").position(283, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
-        if (gameState != "over" && gameState != "win") {
-            playerCar.x += ((road.velocityY / 2));
-        }
-    });
-    // toggleHiddenArrows(true);
+    rect(250, 400, 50, 50);
+    // upArrow
+    //  = createButton("🠕").position(250, 400).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+    //     if (gameState != "over" && gameState != "win") {
+    //         controlBackgroundSpeed();
+    //         if (fuelLeft > 0) {
+    //             fuelLeft = fuelLeft - 1200;
+    //         }
+    //     }
+    // });
+    // downArrow
+    //  = createButton("🠗").position(250, 451.5).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+    //     graduallyDecreaseSpeed();
+    //     console.log("a");
+    // });
+    // leftArrow
+    //  = createButton("🠔").position(202, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+    //     if (gameState != "over" && gameState != "win") {
+    //         playerCar.x -= ((road.velocityY / 2));
+    //     }
+    // });
+    // rightArrow
+    //  = createButton("🠖").position(283, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+    //     if (gameState != "over" && gameState != "win") {
+    //         playerCar.x += ((road.velocityY / 2));
+    //     }
+    // });
 }
 
-function toggleHiddenArrows(show) {
-    if (show && isUserOnTouchScreenDevice()) {
-        upArrow.hide();
-        downArrow.hide();
-        leftArrow.hide();
-        rightArrow.hide();
-    }
-    else if (!show) {
-        upArrow.hide();
-        downArrow.hide();
-        leftArrow.hide();
-        rightArrow.hide();
-    }
-}
+// function toggleHiddenArrows(show) {
+//     if (show && isUserOnTouchScreenDevice()) {
+//         upArrow.hide();
+//         downArrow.hide();
+//         leftArrow.hide();
+//         rightArrow.hide();
+//     }
+//     else if (!show) {
+//         upArrow.hide();
+//         downArrow.hide();
+//         leftArrow.hide();
+//         rightArrow.hide();
+//     }
+// }

@@ -5,7 +5,7 @@ var road, fuelLeft, fuelShow, startTimerShow, rightEdgeX, leftEdgeX, laneX,
     fuelCars, collidedOtherCars, sec, nameInp, carShowFlag1, carShowFlag2,
     maxOtherCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
     otherCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading, upArrow, downArrow, leftArrow, rightArrow,
-    passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, giveUp,
+    passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCountUpdated, giveUp,
     otherCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation, canvas, loggedIn, startBgMusic, fuelAlert, gotOtherPlrName,
     crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo, connected, fuelLeftPercentage, oppsFuelLeft, showedOhhYouLostAlert, playerCarOther;
 
@@ -47,13 +47,15 @@ function preload() {
 }
 
 function setup() {
-    bgMusic.setVolume(0.26);
+    bgMusic.setVolume(0.7);
     alertSnd.setVolume(5);
     fuelReloadSnd.setVolume(5);
     createCanvas(500, 400);
+    // IMPORTANT: I had tried making a function named alertMsg which included 2 lines of code, one of the sound, and the other of the alert(<<massage>>);. The normal alert message displays a notification with a 'Ok' button, but with a 3rd party function, if showed the 'Cancel' otpion also, so I rempved that function and used the normal alert to avoid unnecessary buttons.
+    alertSnd.play();
     // Alerting the player for the ways as to how to go further and get in the game.
     // IMPORTANT: The two arrows have not been indented because they were getting indented in the alert as well
-    alertMsg(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
+    alert(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
 ---> If you want to create a new account, click on 'Create a new account'
 ---> If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :) Hope you will enjoy this game. Thanks for your attention.`);
     // Database setup
@@ -96,7 +98,7 @@ function setup() {
 
     // other variables used to control
     gameStarted = false;
-    plrCntDecreased = false;
+    plrCountUpdated = false;
     myLoseSent = false;
     giveUpSet = false;
     cancelCheckingOtherPlayerLoosing = false;

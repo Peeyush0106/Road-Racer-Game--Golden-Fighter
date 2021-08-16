@@ -2,16 +2,19 @@
 function draw() {
     checkConnection();
     image(goIMG, 200, 200);
+
     collidedOtherCars.setLifetimeEach(2.2);
     if (gameLoaded && gameStarted) {
         if (!gotOtherPlrName) {
             getOtherPlrName();
         }
+        if (playerCount < 2) {
+            gameState = 'win';
+        }
         // toggleHiddenArrows(true);
         startBgMusic = "no-not the right time";
-        bgMusic.setVolume(0.1);
         background("black");
-        checkIfOtherPlayerWonAndThenLoseMe();
+
         if (!cancelGameMovement) {
             updateMyFuelLeft();
             getOppsFuelLeft();
@@ -28,10 +31,10 @@ function draw() {
                 giveUp.hide();
             }
             if (!cancelCheckingOtherPlayerLoosing) {
-                getOtherPlayerLoosing();
+                getOtherPlayerLosing();
             }
             // Set some continuous properties
-            map1.setVelocity(0, -1 * (road.velocityY / 46));
+            map1.setVelocity(0, -1 * (road.velocityY / 70));
             fuelShow = Math.round((fuelLeft / 10000));
 
             //  Control game with conditional programming
@@ -54,11 +57,13 @@ function draw() {
             database.ref("Playing/players/" + plrIndex).update({
                 lost: true
             });
-            if (!plrCntDecreased) {
+            if (!plrCountUpdated) {
                 playerCount -= 1;
                 updatePlayerCount(playerCount);
-                plrCntDecreased = true;
+                plrCountUpdated = true;
             }
+        } else {
+            checkIfOtherPlayerWonAndThenLoseMe();
         }
 
         if (otherPlrLost) {
@@ -74,6 +79,17 @@ function draw() {
             otherPlrLost = true;
             database.ref("Playing/players/" + otherPlrIndex).remove();
             showWinMessage();
+        }
+
+        // When the game is won
+        if (gameState === "win") {
+            showWinMessage();
+            loseOtherPlayer();
+            if (!plrCountUpdated) {
+                playerCount = 0;
+                updatePlayerCount(playerCount);
+                plrCountUpdated = true;
+            }
         }
 
         if (!cancelGameMovement) {
@@ -137,16 +153,7 @@ function draw() {
             // Set speeds of our cars
             controlWorldCarsVelocity();
 
-            // When the game is won
-            if (gameState === "win") {
-                showWinMessage();
-                loseOtherPlayer();
-                if (!plrCntDecreased) {
-                    playerCount -= 1;
-                    updatePlayerCount(playerCount);
-                    plrCntDecreased = true;
-                }
-            }
+            
 
             // If 60 frames have past after the playerCar touched any obstacle
             if (touchingCounter > 60) {
@@ -231,7 +238,7 @@ function draw() {
             }
 
             // WHat al coditions make the game win
-            if (distanceTravelled > 199 && sec < 100) {
+            if (distanceTravelled > 299 && sec < 100) {
                 finishLine.visible = true;
                 playerCar.depth = 100;
                 finishLine.addImage("image", finLineIMG);
@@ -277,7 +284,8 @@ function draw() {
     }
     if (nameChecked) {
         if (plrNameAlreadyTaken) {
-            alertMsg("Name already taken, choose another one");
+            alertSnd.play();
+            alert("Name already taken, choose another one");
             location.reload();
         } else {
             // Create new account and start playing
@@ -293,14 +301,16 @@ function draw() {
     }
     else if (passwordStatus === -1 && !cancelAllCommands) {
         cancelAllCommands = true;
-        alertMsg("Incorrect password, please try again!!");
+        alertSnd.play();
+        alert("Incorrect password, please try again!!");
         passwordStatus = 0;
         location.reload();
         noLoop();
     }
     else if (passwordStatus === -2 && !cancelAllCommands) {
         cancelAllCommands = true;
-        alertMsg("Account does not exist, try creating a new one!!");
+        alertSnd.play();
+        alert("Account does not exist, try creating a new one!!");
         location.reload();
         noLoop();
         passwordStatus = 0;
