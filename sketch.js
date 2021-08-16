@@ -1,12 +1,20 @@
 // Our main draw functin to control each and every part
 function draw() {
-    getOtherPlrName();
-    image(goIMG, 200, 200)
-    collidedBlueCars.setLifetimeEach(2.2);
-    collidedRedCars.setLifetimeEach(2.2);
+    checkConnection();
+    image(goIMG, 200, 200);
+    collidedOtherCars.setLifetimeEach(2.2);
     if (gameLoaded && gameStarted) {
+        if (!gotOtherPlrName) {
+            getOtherPlrName();
+        }
+        toggleHiddenArrows(true);
+        startBgMusic = "no-not the right time";
+        bgMusic.setVolume(0.1);
         background("black");
+        checkIfOtherPlayerWonAndThenLoseMe();
         if (!cancelGameMovement) {
+            updateMyFuelLeft();
+            getOppsFuelLeft();
             updateMyGamingStatus();
             sec = World.seconds - secondTimeDiff;
             if (!playInfoSet) {
@@ -23,26 +31,14 @@ function draw() {
                 getOtherPlayerLoosing();
             }
             // Set some continuous properties
-            map1.setVelocity(0, -1 * (road.velocityY / 53));
-            if (playerData !== undefined) {
-                for (let j = 1; j <= playerCount; j++) {
-                    console.log(j);
-                    if (playerData[j] !== undefined && playerData[j].name !== undefined && plrName === playerData[j].name) {
-                        continue;
-                    }
-                    if (playerData[j] !== undefined) {
-                        playerCarOther.y = playerData[j].y;
-                    }
-                }
-            }
+            map1.setVelocity(0, -1 * (road.velocityY / 46));
             fuelShow = Math.round((fuelLeft / 10000));
 
             //  Control game with conditional programming
 
             // When the game is won
             if (playerCar.y < 0 - (playerCar.width / 2)) {
-                blueCars.destroyEach();
-                redCars.destroyEach();
+                otherCars.destroyEach();
                 playerCar.destroy();
                 gameState = "win";
             }
@@ -81,6 +77,19 @@ function draw() {
         }
 
         if (!cancelGameMovement) {
+            // set the other player car properties
+            if (playerData !== undefined && playerData[otherPlrIndex] !== undefined) {
+                playerCarOther.y = playerData[otherPlrIndex].y;
+                push();
+                textSize(10);
+                fill("red");
+                text("Fuel left in your", 400, 300)
+                text("opponent's car: " + round(oppsFuelLeft) + "%", 400, 310);
+                fill("lightblue");
+                text("Fuel left in your", 400, 330)
+                text(" car: " + fuelLeftPercentage + "%", 400, 340);
+                pop();
+            }
 
             // When the game is running, not won or lost
             if (gameState != "win" && gameState != "over") {
@@ -100,10 +109,13 @@ function draw() {
                 fill("yellow");
 
                 text("Fuel: " + fuelShow + "L", 75, 20);
-                text("Stars: " + stars, 75, 40);
+                push();
+                textSize(10);
+                text("Time Ellapsed: " + sec + " Sec", 75, 40);
+                pop();
                 text("Speed: " + Math.round(road.velocityY * 10) + " Km/Hr", 75, 60);
                 text("Distance Travelled: " + distanceTravelled + "0 M", 185, 20);
-                text("Time Elapsed: " + sec + " Sec", 185, 40);
+                text("Time Left: " + (100 - sec) + " Sec", 185, 40);
                 text("To travel more: " + (200 - distanceTravelled + "0 M"), 185, 60);
 
                 push();
@@ -188,31 +200,26 @@ function draw() {
                 && gameState != "waiting"
                 && sec >= 4
                 && !playerCar.isTouching(edges)
-                && !playerCar.isTouching(redCars)
-                && !playerCar.isTouching(blueCars)) {
+                && !playerCar.isTouching(otherCars)) {
                 gameState = "startedAndMoving";
                 if (fuelShow > 0) {
                     gamingControlsUpDown();
                 }
 
                 // What all conditions make the game over
-                if (fuelShow <= 0 || sec > 100 || stars <= 0) {
+                if (fuelShow <= 0 || sec > 100) {
                     gameState = "over";
                 }
             }
 
             // When the player car is touching the obstacles
             if (playerCar.isTouching(edges)
-                || playerCar.isTouching(redCars)
-                || playerCar.isTouching(blueCars)
-                || playerCar.isTouching(collidedBlueCars)
-                || playerCar.isTouching(collidedRedCars)) {
+                || playerCar.isTouching(otherCars)
+                || playerCar.isTouching(collidedOtherCars)) {
                 gameState = "car-hit";
                 playerCar.collide(edges);
-                // playerCar.collide(redCars);
-                // playerCar.collide(blueCars);
-                // playerCar.collide(collidedBlueCars);
-                // playerCar.collide(collidedRedCars);
+                // playerCar.collide(otherCars);
+                // playerCar.collide(collidedOtherCars);
                 graduallyDecreaseSpeed();
                 carHit();
             }
@@ -224,7 +231,7 @@ function draw() {
             }
 
             // WHat al coditions make the game win
-            if (distanceTravelled > 199 && sec < 100 && stars > 0) {
+            if (distanceTravelled > 199 && sec < 100) {
                 finishLine.visible = true;
                 playerCar.depth = 100;
                 finishLine.addImage("image", finLineIMG);
@@ -245,37 +252,32 @@ function draw() {
 
             // When any obstacle touches any other obstacle
 
-            // For blue and red.
-            if (blueCars.isTouching(redCars) || redCars.isTouching(blueCars)) {
-                // Handle blue and red collided cars
-                handleCollidedCars();
-                // The car that touched the other car from behind, will stop.
-            }
-
-            // Blue car with fuel car
-            if (blueCars.isTouching(fuelCars)) {
-                // Blue car reloads its fuel capacity
-                fuelReloadBlueCar();
-            }
-
-            // Red car with fuel car
-            if (redCars.isTouching(fuelCars)) {
-                fuelReloadRedCar();
+            // Other car with fuel car
+            if (otherCars.isTouching(fuelCars)) {
+                // Other car reloads its fuel capacity
+                fuelReloadOtherCar();
             }
 
             //  An already collided car can also reload its fuel
-            if (collidedBlueCars.isTouching(fuelCars) || collidedRedCars.isTouching(fuelCars)) {
+            if (collidedOtherCars.isTouching(fuelCars)) {
                 // When it touches fuel, its fuel reloads
                 fuelReloadCollidedCar();
             }
+            if (fuelShow <= 5 && fuelShow !== 0) {
+                fuelAlert.html("Fuel Alert!! <br> You only have <br> " + fuelShow + "L of fuel");
+            }
+            else {
+                fuelAlert.html("");
+            }
         }
+        checkIfOtherPlayerLeftAndThenLeaveMyGame();
     }
     else {
         background("green");
     }
     if (nameChecked) {
         if (plrNameAlreadyTaken) {
-            alert("Name already taken, choose another one");
+            alertMsg("Name already taken, choose another one");
             location.reload();
         } else {
             // Create new account and start playing
@@ -291,17 +293,17 @@ function draw() {
     }
     else if (passwordStatus === -1 && !cancelAllCommands) {
         cancelAllCommands = true;
-        console.log("yes");
-        alert("Incorrect password, please try again!!");
+        alertMsg("Incorrect password, please try again!!");
         passwordStatus = 0;
         location.reload();
+        noLoop();
     }
     else if (passwordStatus === -2 && !cancelAllCommands) {
         cancelAllCommands = true;
-        console.log("yes");
-        alert("Account does not exist, try creating a new one!!");
-        passwordStatus = 0;
+        alertMsg("Account does not exist, try creating a new one!!");
         location.reload();
+        noLoop();
+        passwordStatus = 0;
     }
     getPlayerCount();
     getAllPlayersGamingStatus();
@@ -318,15 +320,98 @@ function draw() {
         }
     }
     if (gameState === "waiting") {
-        showLoadingAnim();
+        showLoadingAnim("white", rgb(64, 93, 196));
     }
-    if (!gameStarted) {
+    if (!gameStarted && !showContentForNotLoaded) {
         if (gameState === "waiting") {
             image(logo, 40, 145);
+            waitingTxt.show();
+            if (startBgMusic === "no-not the right time") {
+                startBgMusic = "yes-waitingForPlr";
+            }
         }
         else {
-            image(gameImg, 40, 145, 624 / 1.5, 288 / 1.5);
+            image(gameImg, 40, 145, (624 / 1.5), (288 / 1.5));
+            inputName.show();
+            inputPassword.show();
+            createAccount.show();
+            loginAndPlay.show();
+            nameText.show();
+            pwdText.show();
+        }
+        cancelGameMovement = false;
+    }
+    if (showContentForNotLoaded) {
+        // y: (400 - 250) / 2 to put it at the center.
+        image(gameImg, 0, (400 - 250) / 2, 500, 250);
+        inputName.hide();
+        inputPassword.hide();
+        createAccount.hide();
+        loginAndPlay.hide();
+        nameText.hide();
+        pwdText.hide();
+        waitingTxt.hide();
+        showLoadingAnim("red", "red");
+        cancelGameMovement = true;
+        if (gameState === "waiting") {
+            alert("Your network is unstable, and we couldn't connect you with the game. Please fix your network connection, and the game will autmatically resume.");
+            gameState = "wasWaitingAndDisconnected";
+        }
+        if (gameState === "startedAndMoving") {
+            alert("Sorry, but you will have to leave this game, as your network connection is not fine. Your car is getting disappointed, but no worries! you can win another race after your connection gets fixed and just make your car happy as before...");
+            gameState = "connectionLostWhilePlaying";
         }
     }
-    checkIfOtherPlayerWonAndThenLoseMe();
+    // Letting know the player so that he/she can join the game.
+    if (connected && !loggedIn) {
+        // Do not allow entering the game when others are playing
+        if (playerCount === 2) {
+            createAccount.elt.style["background-color"] = "gray";
+            loginAndPlay.elt.style["background-color"] = "gray";
+            createAccount.elt.disabled = true;
+            loginAndPlay.elt.disabled = true;
+            push();
+            fill("red");
+            stroke("blue");
+            textSize(20);
+            text("There are already 2 players playing this game, wait for them and check back after 1-2 minutes later.", 2, 90, 498);
+            text("2 Players are playing already.", 2, 350, 498);
+            pop();
+        }
+        else {
+            createAccount.elt.style["background-color"] = "red";
+            loginAndPlay.elt.style["background-color"] = "blue";
+            createAccount.elt.disabled = false;
+            loginAndPlay.elt.disabled = false;
+        }
+
+        // Let player know when somewhone is waiting to play.
+        if (playerCount === 1 && gameState !== "waiting") {
+            push();
+            fill("yellow");
+            stroke("black");
+            strokeWeight(3);
+            textSize(20);
+            text("One player is waiting to play!! Join the game fast before anyone else reaches!!", 2, 90, 498);
+            text("1 Player is ready to play.", 2, 350, 498);
+            pop();
+        }
+        if (playerCount === 0) {
+            push();
+            fill("yellow");
+            stroke("red");
+            strokeWeight(2.7);
+            textSize(20);
+            text("No ones there to play, join the game fast before any other 2 players reach the game!", 2, 90, 498);
+            text("None are playing currently.", 2, 350, 498);
+            pop();
+        }
+    }
+    if (startBgMusic === "yes-waitingForPlr") {
+        bgMusic.loop();
+        startBgMusic = "no-alreadyPlaying";
+    }
+    if (startBgMusic === "no-not the right time") {
+        bgMusic.stop();
+    }
 }

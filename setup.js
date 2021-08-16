@@ -1,18 +1,18 @@
 // Initial Variable Declaration
-var road, fuelLeft, fuelShow,
-    stars, startTimerShow, rightEdgeX, leftEdgeX, laneX,
+var road, fuelLeft, fuelShow, startTimerShow, rightEdgeX, leftEdgeX, laneX,
     edges, rightEdge, leftEdge, startCounter, touchingCounter,
-    gameState, distanceTravelled, finishLine, playerCar, blueCars, redCars, cancelAllCommands,
-    fuelCars, collidedBlueCars, collidedRedCars, sec, nameInp, carShowFlag1, carShowFlag2,
-    maxBlueCars, maxRedCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
-    blueCarVelocity, redCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading,
+    gameState, distanceTravelled, finishLine, playerCar, otherCars, cancelAllCommands,
+    fuelCars, collidedOtherCars, sec, nameInp, carShowFlag1, carShowFlag2,
+    maxOtherCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
+    otherCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading, upArrow, downArrow, leftArrow, rightArrow,
     passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCntDecreased, giveUp,
-    blueCarSpacing, redCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation,
-    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo;
+    otherCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation, canvas, loggedIn, startBgMusic, fuelAlert, gotOtherPlrName,
+    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo, connected, fuelLeftPercentage, oppsFuelLeft, showedOhhYouLostAlert, playerCarOther;
 
 function preload() {
     gameLoaded = false;
     imgLoads = [];
+    // images loading
     img1 = loadImage("images/1.png", gameIsLoaded());
     img2 = loadImage("images/2.png", gameIsLoaded());
     img3 = loadImage("images/3.png", gameIsLoaded());
@@ -39,13 +39,21 @@ function preload() {
     cloud = loadImage("images/cloud.jpg", gameIsLoaded());
     gameImg = loadImage("images/Game-img.png", gameIsLoaded());
     logo = loadImage("images/logo.png", gameIsLoaded());
+
+    // loading sounds
+    alertSnd = loadSound("sounds/alert.wav");
+    fuelReloadSnd = loadSound("sounds/fuel-reload.wav");
+    bgMusic = loadSound("sounds/bg-music.mp3");
 }
 
 function setup() {
+    bgMusic.setVolume(0.26);
+    alertSnd.setVolume(5);
+    fuelReloadSnd.setVolume(5);
     createCanvas(500, 400);
     // Alerting the player for the ways as to how to go further and get in the game.
     // IMPORTANT: The two arrows have not been indented because they were getting indented in the alert as well
-    alert(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
+    alertMsg(`Hello! Welcome to Road Racing Game. Please read this message carefully to understand the game. 
 ---> If you want to create a new account, click on 'Create a new account'
 ---> If you want to resume an account, just enter the earlier details and 'Login and Start Playing'. :) Hope you will enjoy this game. Thanks for your attention.`);
     // Database setup
@@ -87,7 +95,6 @@ function setup() {
     fuelShow = 0;
 
     // other variables used to control
-    stars = 12;
     gameStarted = false;
     plrCntDecreased = false;
     myLoseSent = false;
@@ -98,6 +105,10 @@ function setup() {
     msgPositionsSet = false;
     cancelGameMovement = false;
     leavingGame = false;
+    showedOhhYouLostAlert = false;
+    loggedIn = false;
+    gotOtherPlrName = false;
+    startBgMusic = "no-not the right time";
     startCounter = 0;
     touchingCounter = 0;
     gameState = "gettingStarted";
@@ -145,25 +156,20 @@ function setup() {
     createPlayerCar();
 
     // World Vehicles
-    blueCars = createGroup();
-    redCars = createGroup();
+    otherCars = createGroup();
     fuelCars = createGroup();
-    collidedBlueCars = createGroup();
-    collidedRedCars = createGroup();
+    collidedOtherCars = createGroup();
 
     // No of other cars in game
-    maxBlueCars = 8;
-    maxRedCars = 8;
+    maxOtherCars = 16;
     maxfuelCars = 5;
 
     // velocities of other cars
-    blueCarVelocity = random(5, 7);
-    redCarVelocity = random(5, 7);
+    otherCarVelocity = random(5, 7);
     fuelCarVelocity = random(4.5, 6.5);
 
     // Y Offset for the starting of cars
-    blueCarSpacing = 300;
-    redCarSpacing = 300;
+    otherCarSpacing = 300;
     fuelCarSpacing = 750;
 
     nameChecked = false;
@@ -183,11 +189,13 @@ function setup() {
 
     endTxt = createElement('h5').position(130, 120).style("color", "red").html("You win!!! Amazing driving..").hide();
 
+    fuelAlert = createElement('h5').position(395, 210).style("color", "red").style("background-color", "yellow");
+
     endGameBtn = createButton("End Game").position(200, 250).style("background-color", "red").style("color", "white").style("font-size", "10px").mousePressed(function () {
         location.reload();
     }).hide();
 
-    createAccount = createButton("Create a new account").position(250, 30).style("background-color", "red").style("color", "white").mousePressed(function () {
+    createAccount = createButton("Create a new account and Start Playing").position(245, 30).style("background-color", "gray").style("color", "white").mousePressed(function () {
         if (!cancelAllCommands) {
             plrNameAlreadyTaken = false;
             nameChecked = false;
@@ -195,32 +203,37 @@ function setup() {
             checkPasswordAndNameErr();
             checkNameExistence(plrName);
             putMeInWaitingRoom();
+            loggedIn = true;
         }
     });
-    loginAndPlay = createButton("Login and Start Playing").position(250, 55).style("background-color", "blue").style("color", "white").mousePressed(function () {
+    createAccount.elt.disabled = true;
+    loginAndPlay = createButton("Login and Start Playing").position(245, 55).style("background-color", "gray").style("color", "white").mousePressed(function () {
         if (!cancelAllCommands) {
             if (playerCount === 0) {
                 database.ref("Playing").remove();
             }
             plrName = inputName.value();
             var pwd = inputPassword.value();
-            checkPasswordAndNameErr();
-            checkPasswordCorrect(plrName, pwd);
-            putMeInWaitingRoom();
-            playCliked = true;
-            plrIndex = playerCount;
-            if (plrIndex === 1) {
-                otherPlrIndex = 2;
+            if (checkPasswordAndNameErr() && checkPasswordCorrect(plrName, pwd)) {
+                console.log(checkPasswordAndNameErr());
+                console.log(checkPasswordCorrect(plrName, pwd));
+                putMeInWaitingRoom();
+                playCliked = true;
+                plrIndex = playerCount;
+                if (plrIndex === 1) {
+                    otherPlrIndex = 2;
+                }
+                if (plrIndex === 2) {
+                    otherPlrIndex = 1;
+                }
             }
-            if (plrIndex === 2) {
-                otherPlrIndex = 1;
-            }
+            loggedIn = true;
         }
     });
+    loginAndPlay.elt.disabled = true;
     giveUp = createButton("Give Up").position(360, 350).style("background-color", "red").style("color", "white").mousePressed(function () {
         if (gameState !== "waiting") {
             if (confirm("Are you sure you want to give up?")) {
-                console.log("Give up");
                 database.ref("Playing/players/" + plrIndex).update({
                     lost: true
                 }).then(() => {
@@ -233,6 +246,8 @@ function setup() {
         }
     }).hide();
 
+    createVirtualArrowKeys();
+
     createWorldVehicles();
     if (imgLoads.length === 26 && gameReadyToPlay) {
         gameLoaded = true;
@@ -240,4 +255,5 @@ function setup() {
     sec = 0;
     // Settng initial playerCount
     playerCount = 0;
+    // document.body.style.zoom = "187.5%";
 }

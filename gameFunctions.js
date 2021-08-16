@@ -9,95 +9,49 @@ function createPlayerCar() {
 
 // Creating Intial Opponent Vehicles
 function createWorldVehicles() {
-    for (var i = 0; i < maxBlueCars; i++) {
-        var blueCarLane = Math.round(random(0, 2));
-        var blueCarX = laneX[blueCarLane];
-        var blueCar = createSprite(blueCarX, -1 * blueCarSpacing * (i + 1));
-        var blueCarAnimations = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12];
-        var blueCarAnimationNumber = Math.round(random(0, 11));
-        var blueCarChoseAnimation = blueCarAnimations[blueCarAnimationNumber];
-        blueCar.addImage("image", blueCarChoseAnimation);
+    for (var i = 0; i < maxOtherCars; i++) {
+        var otherCarLane = Math.round(random(0, 2));
+        var otherCarX = laneX[otherCarLane];
+        var otherCar = createSprite(otherCarX, -1 * otherCarSpacing * (i + 1));
+        var otherCarAnimations = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12];
+        var otherCarAnimationNumber = Math.round(random(0, 11));
+        var otherCarChoseAnimation = otherCarAnimations[otherCarAnimationNumber];
+        otherCar.addImage("image", otherCarChoseAnimation);
 
-        if (blueCarAnimationNumber != 9
-            && blueCarAnimationNumber != 10) {
-            blueCar.scale = 0.14;
+        if (otherCarAnimationNumber != 9
+            && otherCarAnimationNumber != 10) {
+            otherCar.scale = 0.14;
         }
         else {
-            blueCar.scale = 0.5;
+            otherCar.scale = 0.5;
         }
-        if (blueCarAnimationNumber === 0) {
-            blueCar.scale = 0.2;
+        if (otherCarAnimationNumber === 0) {
+            otherCar.scale = 0.2;
         }
-        if (blueCarAnimationNumber === 7) {
-            blueCar.scale = 0.2;
+        if (otherCarAnimationNumber === 7) {
+            otherCar.scale = 0.2;
         }
-        if (blueCarAnimationNumber === 4) {
-            blueCar.scale = 0.3;
+        if (otherCarAnimationNumber === 4) {
+            otherCar.scale = 0.3;
         }
-        if (blueCarAnimationNumber === 1) {
-            blueCar.scale = 0.12;
+        if (otherCarAnimationNumber === 1) {
+            otherCar.scale = 0.12;
         }
-        if (blueCarAnimationNumber === 2) {
-            blueCar.scale = 0.15;
+        if (otherCarAnimationNumber === 2) {
+            otherCar.scale = 0.15;
         }
-        if (blueCarAnimationNumber === 6) {
-            blueCar.scale = 0.1;
+        if (otherCarAnimationNumber === 6) {
+            otherCar.scale = 0.1;
         }
-        if (blueCarAnimationNumber === 5) {
-            blueCar.scale = 0.1;
+        if (otherCarAnimationNumber === 5) {
+            otherCar.scale = 0.1;
         }
-        if (blueCarAnimationNumber === 8
-            || blueCarAnimationNumber === 11
-            || blueCarAnimationNumber === 3) {
-            blueCar.scale = 0.1;
+        if (otherCarAnimationNumber === 8
+            || otherCarAnimationNumber === 11
+            || otherCarAnimationNumber === 3) {
+            otherCar.scale = 0.1;
         }
-        blueCars.add(blueCar);
-    }
-
-    for (var j = 0; j < maxRedCars; j++) {
-        var redCarLane = Math.round(random(0, 2));
-        var redCarX = laneX[redCarLane];
-        var redCar = createSprite(redCarX, -250 + (-1 * redCarSpacing * j));
-        var redCarAnimations = [img1, img2, img3, img4, img5, img6, img7, img8, img9, img10, img11, img12];
-        var redCarAnimationNumber = Math.round(random(0, 11));
-        var redCarChoseAnimation = redCarAnimations[redCarAnimationNumber];
-        redCar.addImage("image", redCarChoseAnimation);
-
-        if (redCarAnimationNumber != 9
-            && redCarAnimationNumber != 10) {
-            redCar.scale = 0.24;
-        }
-        else {
-            redCar.scale = 0.7;
-        }
-        if (redCarAnimationNumber === 0) {
-            redCar.scale = 0.2;
-        }
-        if (redCarAnimationNumber === 7) {
-            redCar.scale = 0.2;
-        }
-        if (redCarAnimationNumber === 4) {
-            redCar.scale = 0.3;
-        }
-        if (redCarAnimationNumber === 1) {
-            redCar.scale = 0.12;
-        }
-        if (redCarAnimationNumber === 2) {
-            redCar.scale = 0.15;
-        }
-        if (redCarAnimationNumber === 6) {
-            redCar.scale = 0.1;
-        }
-        if (redCarAnimationNumber === 5) {
-            redCar.scale = 0.1;
-        }
-        if (redCarAnimationNumber === 8
-            || redCarAnimationNumber === 11
-            || redCarAnimationNumber === 3) {
-            redCar.scale = 0.1;
-        }
-        //  redCar.rotation = -90;
-        redCars.add(redCar);
+        otherCars.add(otherCar);
     }
 
     for (var k = 0; k < maxfuelCars; k++) {
@@ -106,7 +60,6 @@ function createWorldVehicles() {
 
         var fuelCar = createSprite(fuelCarCarX, -1 * fuelCarSpacing * (k + 1));
         fuelCar.addImage("image", fuelCarIMG);
-
         fuelCar.scale = 0.22;
         fuelCars.add(fuelCar);
     }
@@ -114,30 +67,19 @@ function createWorldVehicles() {
 
 // Control the speed of our cars
 function controlWorldCarsVelocity() {
-    blueCars.setVelocityYEach(road.velocityY - blueCarVelocity);
-    redCars.setVelocityYEach(road.velocityY - redCarVelocity);
+    otherCars.setVelocityYEach(road.velocityY - otherCarVelocity);
+    otherCarVelocity = random(5, 7);
     fuelCars.setVelocityYEach(road.velocityY - fuelCarVelocity);
-    collidedBlueCars.setVelocityYEach(road.velocityY);
-    collidedBlueCars.setLifetimeEach(2);
-    collidedRedCars.setVelocityYEach(road.velocityY);
-    collidedRedCars.setLifetimeEach(2);
+    collidedOtherCars.destroyEach();
 }
 
 // When our car has been overtaken, reuse them ahead
 function recreateOvertakenCars() {
-    // For blue
-    for (var i = 0; i < blueCars.length; i++) {
-        var blueCar = blueCars.get(i);
-        if (blueCar.y > 600) {
-            blueCar.y = blueCar.y - maxBlueCars * blueCarSpacing;
-        }
-    }
-
-    // For red
-    for (var j = 0; j < redCars.length; j++) {
-        var redCar = redCars.get(j);
-        if (redCar.y > 600) {
-            redCar.y = redCar.y - maxRedCars * redCarSpacing;
+    // For other
+    for (var i = 0; i < otherCars.length; i++) {
+        var otherCar = otherCars.get(i);
+        if (otherCar.y > 600) {
+            otherCar.y = otherCar.y - maxOtherCars * otherCarSpacing;
         }
     }
 
@@ -149,23 +91,13 @@ function recreateOvertakenCars() {
         }
     }
 
-    // Collided Blue Cars
-    for (var m; m < collidedBlueCars.length; m++) {
-        var collidedBlueCar = collidedBlueCars.get(m);
-        if (collidedBlueCar.y > 600) {
-            blueCars.add(collidedBlueCar);
-            collidedBlueCars.remove(collidedBlueCar);
-            collidedBlueCar.y = collidedBlueCar.y - maxBlueCars * blueCarSpacing;
-        }
-    }
-
-    // Collided Red Cars
-    for (var n; n < collidedRedCars.length; n++) {
-        var collidedRedCar = collidedRedCars.get(n);
-        if (collidedRedCar.y > 600) {
-            redCars.add(collidedRedCar);
-            collidedRedCars.remove(collidedRedCar);
-            collidedRedCar.y = collidedRedCar.y - maxRedCars * redCarSpacing;
+    // Collided Other Cars
+    for (var m; m < collidedOtherCars.length; m++) {
+        var collidedOtherCar = collidedOtherCars.get(m);
+        if (collidedOtherCar.y > 600) {
+            otherCars.add(collidedOtherCar);
+            collidedOtherCars.remove(collidedOtherCar);
+            collidedOtherCar.y = collidedOtherCar.y - maxOtherCars * otherCarSpacing;
         }
     }
 }
@@ -182,33 +114,20 @@ function fuelReload() {
     for (var i = 0; i < maxfuelCars; i++) {
         var fuelCar = fuelCars.get(i);
         if (playerCar.isTouching(fuelCar)) {
-            fuelLeft = fuelLeft + 45000;
-            stars = stars - 2;
+            fuelLeft = fuelLeft + 165000;
             fuelCar.y = fuelCar.y - maxfuelCars * fuelCarSpacing;
+            fuelReloadSnd.play();
         }
     }
 }
 
-// Function for Fuel Reload for Blue Car
-function fuelReloadBlueCar() {
+// Function for Fuel Reload for Other Car
+function fuelReloadOtherCar() {
     for (var i = 0; i < maxfuelCars; i++) {
         var fuelCar = fuelCars.get(i);
 
-        for (var j = 0; j < blueCars.length; j++) {
-            var computerCar = blueCars.get(j);
-            if (computerCar.isTouching(fuelCar)) {
-                fuelCar.y = fuelCar.y - maxfuelCars * fuelCarSpacing;
-            }
-        }
-    }
-}
-
-// Function for Fuel Reload for Red Car
-function fuelReloadRedCar() {
-    for (var i = 0; i < maxfuelCars; i++) {
-        var fuelCar = fuelCars.get(i);
-        for (var j = 0; j < redCars.length; j++) {
-            var computerCar = redCars.get(j);
+        for (var j = 0; j < otherCars.length; j++) {
+            var computerCar = otherCars.get(j);
             if (computerCar.isTouching(fuelCar)) {
                 fuelCar.y = fuelCar.y - maxfuelCars * fuelCarSpacing;
             }
@@ -220,63 +139,17 @@ function fuelReloadRedCar() {
 function fuelReloadCollidedCar() {
     for (var i = 0; i < maxfuelCars; i++) {
         var fuelCar = fuelCars.get(i);
-        for (var j = 0; j < collidedBlueCars.length; j++) {
-            var computerBlueCar = collidedBlueCars.get(j);
-            if (computerBlueCar.isTouching(fuelCar)) {
+        for (var j = 0; j < collidedOtherCars.length; j++) {
+            var computerOtherCar = collidedOtherCars.get(j);
+            if (computerOtherCar.isTouching(fuelCar)) {
                 fuelCar.y = fuelCar.y - maxfuelCars * fuelCarSpacing;
             }
         }
 
-        for (var k = 0; k < collidedRedCars.length; k++) {
-            var computerRedCar = collidedRedCars.get(k);
-            if (computerRedCar.isTouching(fuelCar)) {
+        for (var k = 0; k < collidedOtherCars.length; k++) {
+            var computerOtherCar = collidedOtherCars.get(k);
+            if (computerOtherCar.isTouching(fuelCar)) {
                 fuelCar.y = fuelCar.y - maxfuelCars * fuelCarSpacing;
-            }
-        }
-    }
-}
-
-// Hnadling the collided cars
-function handleCollidedCars() {
-    // if the collided cars are in the screen, 
-    // remove from the respective groups and add to the collided cars group
-    // and stop the cars
-    for (var i = 0; i < blueCars.length; i++) {
-        for (var j = 0; j < redCars.length; j++) {
-            var blueCar = blueCars.get(i);
-            var redCar = redCars.get(j);
-            if (blueCar.isTouching(redCar) || redCar.isTouching(blueCar)) {
-                // if the collided cars are ahead and not in the display area,
-                // change the lane of one of the cars
-                if (blueCar.y < -200) {
-                    // Change blue car lane
-                    var laneNum = Math.round(random(0, 2));
-                    var carX = laneX[laneNum];
-                    blueCar.x = carX;
-                } else {
-                    // check the car which is ahead
-                    if (blueCar.y < redCar.y) {
-                        // stop the red car
-                        redCars.remove(redCar);
-                        collidedRedCars.add(redCar);
-                        var collidedRedCarTimer;
-                        collidedRedCarTimer = collidedRedCarTimer + 1;
-                        if (collidedRedCarTimer >= 60) {
-                            redCar.setVelocity(0, redCarVelocity);
-                            collidedRedCarTimer = 0;
-                        }
-                    } else {
-                        // stop the blue car
-                        blueCars.remove(blueCar);
-                        collidedBlueCars.add(blueCar);
-                        var collidedBlueCarTimer;
-                        collidedBlueCarTimer = collidedBlueCarTimer + 1;
-                        if (collidedBlueCarTimer >= 60) {
-                            blueCar.setVelocity(0, blueCarVelocity);
-                            collidedBlueCarTimer = 0;
-                        }
-                    }
-                }
             }
         }
     }
@@ -284,7 +157,7 @@ function handleCollidedCars() {
 
 // Controlling the background
 function controlBackgroundSpeed() {
-    if (road.velocityY < 10.8 && gameState != "over") {
+    if (road.velocityY < 14.8 && gameState != "over") {
         road.setVelocity(0, road.velocityY + 0.2);
     }
 }
@@ -322,8 +195,8 @@ function gamingControlsUpDown() {
     if (keyDown("up") && gameState != "over" && gameState != "win") {
         // Increasing speed
         controlBackgroundSpeed();
-        if (fuelLeft > 0 && stars > 0) {
-            fuelLeft = fuelLeft - 500;
+        if (fuelLeft > 0) {
+            fuelLeft = fuelLeft - 1200;
         }
     }
 
@@ -333,7 +206,6 @@ function gamingControlsUpDown() {
         if (road.velocityY < 0) {
             road.velocityY = 0;
         }
-        fuelLeft = fuelLeft - 9;
     }
 
     // Gaming controls for down arrow key
@@ -358,6 +230,7 @@ async function checkPasswordCorrect(name, password) {
             else {
                 passwordStatus = -1; // Validated and incorrect
             }
+            return (masterPwd === password);
         }
         else {
             passwordStatus = -2; // Validated and does not exist
@@ -372,17 +245,20 @@ async function checkPasswordAndNameErr() {
     var name = inputName.value();
     if (pwd === "" && !cancelAllCommands) {
         cancelAllCommands = true;
-        console.log("yes");
-        alert("Please enter a valid password");
+        alertMsg("Please enter a valid password");
+        location.reload();
+        noLoop();
     }
     if (name === "" && !cancelAllCommands) {
         cancelAllCommands = true;
-        console.log("yes");
-        alert("Please enter a valid name");
+        alertMsg("Please enter a valid name");
+        location.reload();
+        noLoop();
     }
     else {
         cancelAllCommands = false;
     }
+    return (pwd === "" && !cancelAllCommands && name === "");
 }
 
 // name existence
@@ -454,16 +330,19 @@ async function getPlayerCount() {
 }
 
 window.onbeforeunload = function () {
-    if (gameState !== "gettingStarted"
-        && gameState !== "over"
+    if (gameState !== "over"
         && gameState !== "win") {
-        if (playerCount === 1) {
-            database.ref("Playing").remove();
-        }
         playerCount = 0;
-        updatePlayerCount(playerCount);
+        database.ref("/").update({
+            playerCount: playerCount
+        });
+        database.ref("Playing/players").remove();
         plrCntDecreased = true;
         unloading = true;
+        // confirmMsg("Are you sure you want to resign?");
+        // database.ref("Alerts/" + otherPlrIndex).update({
+        //     otherPlrLeft: true
+        // });
     }
 
     if (gameStarted || gameState === "waiting") {
@@ -527,7 +406,7 @@ function showWinMessage() {
     // Show player tags
     {
         textSize(15);
-        fill("darkblue");
+        fill("darkother");
         push();
         stroke("white");
         strokeWeight(1.5);
@@ -567,7 +446,7 @@ function showWinMessage() {
             else {
                 textSize(42.5);
             }
-            text(croppedOtherPlrName, 290, 240);
+            text(croppedOtherPlrName, 300, 240);
         }
     }
     // Movement of the crown
@@ -604,6 +483,7 @@ function showLoseMessage() {
     var maxCrownY = 160;
     var maxCloudX1 = 125;
     var maxCloudX2 = 165;
+    crownX = 320;
     endTxt.html("You lose! No problem, try again <br> to beat your opponents and by practising more").style("font-size", "11px").position(130, 130);
     push();
     // Message box
@@ -618,7 +498,7 @@ function showLoseMessage() {
     // Show player tags
     {
         textSize(15);
-        fill("darkblue");
+        fill("darkother");
         push();
         stroke("white");
         strokeWeight(1.5);
@@ -630,11 +510,7 @@ function showLoseMessage() {
     {
         {
             fill("lightgreen");
-            // To-do: remove below line on finalization
             croppedPlrname = plrName.slice(0, 3);
-            if (plrName.length >= 3) {
-                crownX = 300;
-            }
             if (plrName.length > 3) {
                 croppedPlrname = plrName.slice(0, 3) + "..";
                 textSize(22.5);
@@ -646,7 +522,6 @@ function showLoseMessage() {
         }
         {
             fill("magenta");
-            // To-do: remove below line on finalization
             croppedOtherPlrName = otherPlrName.slice(0, 3);
             if (otherPlrName.length >= 3) {
                 cloudX = 160;
@@ -658,7 +533,7 @@ function showLoseMessage() {
             else {
                 textSize(70);
             }
-            text(croppedOtherPlrName, 250, 240);
+            text(croppedOtherPlrName, 300, 240);
         }
     }
     // Movement of the crown
@@ -686,7 +561,10 @@ function showLoseMessage() {
     }
     pop();
     endTxt.show();
-    alert("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or you might have ran out of stars. You loose even when the time of 100 seconds is up. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
+    if (!showedOhhYouLostAlert) {
+        alertMsg("Ohhh..  you lost, you might have lost because your fuel must have reached to 0, or the time of 100 seconds has passed. You also loose when the other player reaches to the finish line before you. Don't worry, practice more and get better and faster in tackling the cars.");
+        showedOhhYouLostAlert = true;
+    }
 }
 
 function stopAllSprites() {
@@ -697,15 +575,24 @@ function stopAllSprites() {
 }
 
 function loseOtherPlayer() {
-    database.ref("Players/playing/" + otherPlrIndex).update({
+    database.ref("Playing/players/" + otherPlrIndex).update({
         otherPlrWon: true
     });
 }
 
 function checkIfOtherPlayerWonAndThenLoseMe() {
-    database.ref("Players/playing/" + otherPlrIndex + "/otherPlrWon").get().then((data) => {
-        if (data.val()) {
+    database.ref("Playing/players/" + plrIndex + "/otherPlrWon").get().then((data) => {
+        if (data.exists()) {
             showLoseMessage();
+        }
+    });
+}
+
+function checkIfOtherPlayerLeftAndThenLeaveMyGame() {
+    database.ref("Alerts/" + plrIndex + "/otherPlrLeft").get().then((data) => {
+        if (data.exists()) {
+            alertMsg("You win!! The other player has resigned, even you will have to end this game.");
+            location.reload();
         }
     });
 }
@@ -714,6 +601,95 @@ function getOtherPlrName() {
     database.ref("Playing/players/" + otherPlrIndex).get().then((data) => {
         if (data.exists()) {
             otherPlrName = data.val().name;
+            gotOtherPlrName = true;
         }
     });
+}
+
+function alertMsg(message) {
+    alertSnd.play();
+    alert(message);
+}
+
+function alertMsg(message) {
+    alertSnd.play();
+    confirm(message);
+}
+
+function updateMyFuelLeft() {
+    fuelLeftPercentage = ((fuelLeft * 100) / 500000);
+    database.ref("Playing/players/" + plrIndex).update({
+        fuelLeftPercentage: fuelLeftPercentage
+    });
+}
+
+function getOppsFuelLeft() {
+    database.ref("Playing/players/" + otherPlrIndex).get().then(function (data) {
+        if (data.exists()) {
+            oppsFuelLeft = data.val().fuelLeftPercentage;
+        }
+    });
+}
+
+function checkConnection() {
+    // Check if we are connected to the internet or not.
+    var connectedRef = firebase.database().ref(".info/connected");
+    connectedRef.on("value", function (snap) {
+        connected = snap.val();
+        if (connected) {
+            showContentForNotLoaded = false;
+            if (gameState === "wasWaitingAndDisconnected") {
+                gameState = "waiting";
+                // Show some text of motivation to player who wanted to play but couldn't because of his/her network and has recovered his internet condition.
+                alert("Success! You have now back to the game and our little car is very happy to get a driver like you that wins every time! Let's make her more happy by winning one more challengin' race!");
+            }
+        }
+        else {
+            showContentForNotLoaded = true;
+        }
+    });
+}
+
+function isUserOnTouchScreenDevice() {
+    return (window.matchMedia("(pointer: coarse)").matches)
+}
+
+function createVirtualArrowKeys() {
+    upArrow = createButton("🠕").position(250, 400).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+        if (gameState != "over" && gameState != "win") {
+            controlBackgroundSpeed();
+            if (fuelLeft > 0) {
+                fuelLeft = fuelLeft - 1200;
+            }
+        }
+    });
+    downArrow = createButton("🠗").position(250, 451.5).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+        graduallyDecreaseSpeed();
+    });
+    leftArrow = createButton("🠔").position(202, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+        if (gameState != "over" && gameState != "win") {
+            playerCar.x -= ((road.velocityY / 2));
+        }
+    });
+    rightArrow = createButton("🠖").position(283, 452).style("background-color", "black").style("color", "white").style("font-size", "35px").mousePressed(function () {
+        if (gameState != "over" && gameState != "win") {
+            playerCar.x += ((road.velocityY / 2));
+        }
+    });
+    toggleHiddenArrows(true);
+}
+
+function toggleHiddenArrows(show) {
+    if (show && isUserOnTouchScreenDevice()) {
+        upArrow.hide();
+        downArrow.hide();
+        leftArrow.hide();
+        rightArrow.hide();
+    }
+    else if (!show) {
+        upArrow.hide();
+        downArrow.hide();
+        leftArrow.hide();
+        rightArrow.hide();
+    }
 }

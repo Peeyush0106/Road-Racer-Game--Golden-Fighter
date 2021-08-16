@@ -13,10 +13,10 @@ function setPointPos() {
 	}
 }
 
-function showLoadingAnim() {
+function showLoadingAnim(color1, color2) {
 	for (var j = 0; j < point_positions.length; j++) {
 		if (point_positions[j] !== null) {
-			fill("lightblue");
+			fill(color1);
 			noStroke();
 			ellipse(point_positions[j].x, point_positions[j].y, 12.5);
 			point_positions[j].x += ((j + 10) * 4) * loadBallsSpeed / 40;
@@ -28,11 +28,11 @@ function showLoadingAnim() {
 			}
 		}
 		else if (stoppedEllipses.length === noOfBalls) {
-			displayStoppedEllipses();
+			displayStoppedEllipses(color2);
 			runStoppedEllipses();
 		}
 		else {
-			displayStoppedEllipses();
+			displayStoppedEllipses(color2);
 		}
 	}
 	if (stoppedEllipses[0] !== undefined && stoppedEllipses[0].x >= 500) {
@@ -55,9 +55,9 @@ function runStoppedEllipses() {
 	}
 }
 
-function displayStoppedEllipses() {
+function displayStoppedEllipses(color) {
 	for (var k = 0; k < stoppedEllipses.length; k++) {
-		fill(64, 93, 196);
+		fill(color);
 		noStroke();
 		ellipse(stoppedEllipses[k].x, stoppedEllipses[k].y, 12.5);
 	}
