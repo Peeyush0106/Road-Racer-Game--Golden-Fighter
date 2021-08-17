@@ -6,8 +6,8 @@ var road, fuelLeft, fuelShow, startTimerShow, rightEdgeX, leftEdgeX, laneX,
     maxOtherCars, maxfuelCars, canvas, nameChecked, gameReadyToPlay, carShowFlags,
     otherCarVelocity, fuelCarVelocity, database, plrName, plrNameAlreadyTaken, nameText, pwdText, playerCount, playCliked, playerData, unloading, upArrow, downArrow, leftArrow, rightArrow,
     passwordStatus, loginAndPlay, gameStarted, waitingTxt, plrCountUpdated, giveUp,
-    otherCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation, canvas, loggedIn, startBgMusic, fuelAlert, gotOtherPlrName,
-    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo, connected, fuelLeftPercentage, oppsFuelLeft, showedOhhYouLostAlert, playerCarOther;
+    otherCarSpacing, fuelCarSpacing, img1, img2, img3, img4, plrIndex, cancelCheckingOtherPlayerLoosing, showedWinMessage, endTxt, crown, crownX, crownRotation, canvas, loggedIn, fuelAlert, gotOtherPlrName,
+    crownY, img5, img6, img7, img8, img9, img10, img11, img12, bgIMG, yellowCarIMG, secondTimeDiff, goIMG, finalFlagPathShowIMG, finLineIMG, fuelCarIMG, fuelIMG, timerIMG, timer1IMG, timer2IMG, timer3IMG, gameLoaded, imgLoads, otherPlrIndex, otherPlrLost, myLoseSent, giveUpSet, cloud, loser, playInfoSet, animalsSong, paradiseSong, msgPositionsSet, cancelGameMovement, leavingGame, gameImg, logo, connected, playParadiseSong, fuelLeftPercentage, oppsFuelLeft, showedOhhYouLostAlert, playerCarOther;
 
 function preload() {
     gameLoaded = false;
@@ -43,13 +43,16 @@ function preload() {
     // loading sounds
     alertSnd = loadSound("sounds/alert.wav");
     fuelReloadSnd = loadSound("sounds/fuel-reload.wav");
-    bgMusic = loadSound("sounds/bg-music.mp3");
+    paradiseSong = loadSound("sounds/Burnout-Paradise-Theme-Song.mp3");
+    animalsSong = loadSound("sounds/Martin Garrix-Animals.mp3");
 }
 
 function setup() {
-    bgMusic.setVolume(0.7);
     alertSnd.setVolume(5);
     fuelReloadSnd.setVolume(5);
+    paradiseSong.setVolume(0.3);
+    animalsSong.setVolume(0.45);
+
     createCanvas(500, 400);
     // IMPORTANT: I had tried making a function named alertMsg which included 2 lines of code, one of the sound, and the other of the alert(<<massage>>);. The normal alert message displays a notification with a 'Ok' button, but with a 3rd party function, if showed the 'Cancel' otpion also, so I rempved that function and used the normal alert to avoid unnecessary buttons.
     alertSnd.play();
@@ -110,7 +113,7 @@ function setup() {
     showedOhhYouLostAlert = false;
     loggedIn = false;
     gotOtherPlrName = false;
-    startBgMusic = "no-not the right time";
+    playParadiseSong = Math.random() > 0.5 ? true : false;
     startCounter = 0;
     touchingCounter = 0;
     gameState = "gettingStarted";
@@ -183,15 +186,15 @@ function setup() {
     nameText = createElement("h5").position(10, 10).html("Your gaming name: ");
     pwdText = createElement("h4").position(10, 35).html("Your password: ");
 
-    info_text = createElement('h5').position(10, 70).html("");
+    info_text = createElement("h5").position(10, 70).html("");
 
-    info_text2 = createElement('h6').position(10, 85).html("").style("font-size", "10px");
+    info_text2 = createElement("h6").position(10, 85).html("").style("font-size", "10px");
 
-    waitingTxt = createElement('h5').position(10, 70).html("Waiting for another player...").hide();
+    waitingTxt = createElement("h5").position(10, 70).html("Waiting for another player...").hide();
 
-    endTxt = createElement('h5').position(130, 120).style("color", "red").html("You win!!! Amazing driving..").hide();
+    endTxt = createElement("h5").position(130, 120).style("color", "red").html("You win!!! Amazing driving..").hide();
 
-    fuelAlert = createElement('h5').position(395, 210).style("color", "red").style("background-color", "yellow");
+    fuelAlert = createElement("h5").position(395, 210).style("color", "red").style("background-color", "yellow");
 
     endGameBtn = createButton("End Game").position(200, 250).style("background-color", "red").style("color", "white").style("font-size", "10px").mousePressed(function () {
         location.reload();
@@ -257,5 +260,4 @@ function setup() {
     sec = 0;
     // Settng initial playerCount
     playerCount = 0;
-    // document.body.style.zoom = "187.5%";
 }

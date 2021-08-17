@@ -3,16 +3,26 @@ function draw() {
     checkConnection();
     image(goIMG, 200, 200);
 
+    if (!(paradiseSong.isPlaying() || animalsSong.isPlaying())) {
+        if (playParadiseSong) {
+            paradiseSong.play();
+            playParadiseSong = false;
+        }
+        else {
+            animalsSong.play();
+            playParadiseSong = true;
+        }
+    }
+
     collidedOtherCars.setLifetimeEach(2.2);
     if (gameLoaded && gameStarted) {
         if (!gotOtherPlrName) {
             getOtherPlrName();
         }
-        if (gameState !== 'over' && gameState !== 'win' && playerCount < 2) {
-            gameState = 'win';
+        if (gameState !== "over" && gameState !== "win" && playerCount < 2) {
+            gameState = "win";
         }
         // toggleHiddenArrows(true);
-        startBgMusic = "no-not the right time";
         background("black");
 
         if (!cancelGameMovement) {
@@ -20,11 +30,7 @@ function draw() {
             getOppsFuelLeft();
             updateMyGamingStatus();
             sec = World.seconds - secondTimeDiff;
-            if (!playInfoSet) {
-                document.getElementById("play-info").hidden = false;
-                select("#play-info").position(405, 30);
-                playInfoSet = true;
-            }
+
             if (!giveUpSet) {
                 giveUp.position(400, 350);
                 giveUpSet = true;
@@ -57,7 +63,7 @@ function draw() {
             database.ref("Playing/players/" + plrIndex).update({
                 lost: true
             });
-            if (!plrCountUpdated) {
+            if (!plrCountUpdated && playerCount !== 0) {
                 console.log("Decreasing PLR Count");
                 playerCount -= 1;
                 updatePlayerCount(playerCount);
@@ -129,10 +135,10 @@ function draw() {
                 textSize(10);
                 text("Time Ellapsed: " + sec + " Sec", 75, 40);
                 pop();
-                text("Speed: " + Math.round(road.velocityY * 10) + " Km/Hr", 75, 60);
+                text("Speed: " + Math.round(road.velocityY * 10) + " km/Hr", 75, 60);
                 text("Distance Travelled: " + distanceTravelled + "0 M", 185, 20);
                 text("Time Left: " + (100 - sec) + " Sec", 185, 40);
-                text("To travel more: " + (200 - distanceTravelled + "0 M"), 185, 60);
+                text("To travel more: " + ((400 - distanceTravelled) * 10 + "0 M"), 185, 60);
 
                 push();
                 stroke("yellow");
@@ -153,7 +159,7 @@ function draw() {
             // Set speeds of our cars
             controlWorldCarsVelocity();
 
-            
+
 
             // If 60 frames have past after the playerCar touched any obstacle
             if (touchingCounter > 60) {
@@ -214,7 +220,7 @@ function draw() {
                 }
 
                 // What all conditions make the game over
-                if (fuelShow <= 0 || sec > 100) {
+                if ((fuelShow <= 0 && road.velocityY === 0) || sec > 100) {
                     gameState = "over";
                 }
             }
@@ -317,6 +323,7 @@ function draw() {
     }
     getPlayerCount();
     getAllPlayersGamingStatus();
+    // Runs first when the game is gone in playing state
     if (playerCount > 1 && !gameStarted && gameLoaded) {
         gameState = "startedAndMoving";
         gameStarted = true;
@@ -336,8 +343,11 @@ function draw() {
         if (gameState === "waiting") {
             image(logo, 40, 145);
             waitingTxt.show();
-            if (startBgMusic === "no-not the right time") {
-                startBgMusic = "yes-waitingForPlr";
+            if (!playInfoSet) {
+                select("#play-info").position
+                    (400, 30).style("background-color: black");
+                document.getElementById("play-info").hidden = false;
+                playInfoSet = true;
             }
         }
         else {
@@ -416,12 +426,5 @@ function draw() {
             text("None are playing currently.", 2, 350, 498);
             pop();
         }
-    }
-    if (startBgMusic === "yes-waitingForPlr") {
-        bgMusic.loop();
-        startBgMusic = "no-alreadyPlaying";
-    }
-    if (startBgMusic === "no-not the right time") {
-        bgMusic.stop();
     }
 }

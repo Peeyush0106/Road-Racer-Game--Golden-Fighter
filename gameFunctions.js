@@ -158,9 +158,18 @@ function fuelReloadCollidedCar() {
 }
 
 // Controlling the background
-function controlBackgroundSpeed() {
-    if (road.velocityY < 14.8 && gameState != "over") {
-        road.setVelocity(0, road.velocityY + 0.2);
+function controlBackgroundSpeed(boost) {
+    var maxSpeed, speedIncrement;
+    if (boost) {
+        maxSpeed = 19.8;
+        speedIncrement = 0.5;
+    }
+    else {
+        maxSpeed = 12.8;
+        speedIncrement = 0.2
+    }
+    if (road.velocityY < maxSpeed && gameState != "over") {
+        road.setVelocity(0, road.velocityY + speedIncrement);
     }
 }
 
@@ -199,6 +208,13 @@ function gamingControlsUpDown() {
         controlBackgroundSpeed();
         if (fuelLeft > 0) {
             fuelLeft = fuelLeft - 1200;
+        }
+    }
+    if (keyDown("enter") && gameState != "over" && gameState != "win") {
+        // Increasing speed with boost
+        controlBackgroundSpeed(true);
+        if (fuelLeft > 0) {
+            fuelLeft = fuelLeft - 2000;
         }
     }
 
@@ -586,7 +602,7 @@ function loseOtherPlayer() {
 function checkIfOtherPlayerWonAndThenLoseMe() {
     database.ref("Playing/players/" + plrIndex + "/otherPlrWon").get().then((data) => {
         if (data.exists()) {
-            gameState = 'over';
+            gameState = "over";
         }
     });
 }
