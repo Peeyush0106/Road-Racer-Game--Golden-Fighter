@@ -175,7 +175,7 @@ function controlBackgroundSpeed(boost) {
 
 // Gradually Decreasing speed
 function graduallyDecreaseSpeed() {
-    road.velocityY = road.velocityY - 0.5;
+    road.velocityY -= 0.5;
     if (road.velocityY < 0) {
         road.velocityY = 0;
     }
@@ -424,7 +424,7 @@ function showWinMessage() {
     // Show player tags
     {
         textSize(15);
-        fill("darkother");
+        fill("darkblue");
         push();
         stroke("white");
         strokeWeight(1.5);
@@ -516,7 +516,7 @@ function showLoseMessage() {
     // Show player tags
     {
         textSize(15);
-        fill("darkother");
+        fill("darkblue");
         push();
         stroke("white");
         strokeWeight(1.5);

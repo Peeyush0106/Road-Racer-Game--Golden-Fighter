@@ -231,9 +231,6 @@ function draw() {
                 || playerCar.isTouching(collidedOtherCars)) {
                 gameState = "car-hit";
                 playerCar.collide(edges);
-                // playerCar.collide(otherCars);
-                // playerCar.collide(collidedOtherCars);
-                graduallyDecreaseSpeed();
                 carHit();
             }
 
@@ -376,10 +373,12 @@ function draw() {
         if (gameState === "waiting") {
             alert("Your network is unstable, and we couldn't connect you with the game. Please fix your network connection, and the game will autmatically resume.");
             gameState = "wasWaitingAndDisconnected";
+            location.reload();
         }
         if (gameState === "startedAndMoving") {
             alert("Sorry, but you will have to leave this game, as your network connection is not fine. Your car is getting disappointed, but no worries! you can win another race after your connection gets fixed and just make your car happy as before...");
             gameState = "connectionLostWhilePlaying";
+            location.reload();
         }
     }
     // Letting know the player so that he/she can join the game.
